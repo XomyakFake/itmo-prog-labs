@@ -39,7 +39,7 @@ public class FilterGreaterThanMpaaRating implements Command {
             }
         }
         if(!found){
-            System.out.println("ФИльмы не найдены");
+            System.out.println("Фильмы не найдены");
         }
        
     }
