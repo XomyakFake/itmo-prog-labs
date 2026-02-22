@@ -19,6 +19,7 @@ public class Main {
         commandinvoker.register(new Add(scanner, collectionmanager));
         commandinvoker.register(new RemoveById(collectionmanager));
         commandinvoker.register(new History(commandinvoker));
+        commandinvoker.register(new FilterGreaterThanMpaaRating(collectionmanager));
 
         while(true){
             String commandName = scanner.nextLine();
