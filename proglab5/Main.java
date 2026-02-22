@@ -20,6 +20,8 @@ public class Main {
         commandinvoker.register(new RemoveById(collectionmanager));
         commandinvoker.register(new History(commandinvoker));
         commandinvoker.register(new FilterGreaterThanMpaaRating(collectionmanager));
+        commandinvoker.register(new PrintDescending(collectionmanager));
+        commandinvoker.register(new PrintFieldDescendingTagline(collectionmanager));
 
         while(true){
             String commandName = scanner.nextLine();
