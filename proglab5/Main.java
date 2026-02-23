@@ -1,6 +1,6 @@
 package proglab5;
-import java.util.Scanner;
 
+import java.util.Scanner;
 import proglab5.commands.*;
 import proglab5.managers.CollectionManager;
 import proglab5.managers.CommandInvoker;
@@ -27,10 +27,11 @@ public class Main {
         commandinvoker.register(new Update(scanner, collectionmanager));
 
         while(true){
+            if(!scanner.hasNextLine()){
+                break;
+            }
             String commandName = scanner.nextLine();
-
             commandinvoker.execute(commandName);
         }
-
     }
 }
