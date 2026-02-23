@@ -22,6 +22,7 @@ public class Main {
         commandinvoker.register(new FilterGreaterThanMpaaRating(collectionmanager));
         commandinvoker.register(new PrintDescending(collectionmanager));
         commandinvoker.register(new PrintFieldDescendingTagline(collectionmanager));
+        commandinvoker.register(new AddIfMax(scanner, collectionmanager));
 
         while(true){
             String commandName = scanner.nextLine();
