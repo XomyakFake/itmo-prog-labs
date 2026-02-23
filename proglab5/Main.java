@@ -23,6 +23,7 @@ public class Main {
         commandinvoker.register(new PrintDescending(collectionmanager));
         commandinvoker.register(new PrintFieldDescendingTagline(collectionmanager));
         commandinvoker.register(new AddIfMax(scanner, collectionmanager));
+        commandinvoker.register(new RemoveGreater(scanner, collectionmanager));
 
         while(true){
             String commandName = scanner.nextLine();
