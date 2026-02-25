@@ -1,5 +1,7 @@
 package proglab5.models;
 
+import java.util.Objects;
+
 import proglab5.utility.Validate;
 
 public class Person implements Validate {
@@ -29,6 +31,21 @@ public class Person implements Validate {
     public Color getEyeColor() { return eyeColor; }
     public Color getHairColor() { return hairColor; }
     public Country getNationality() { return nationality; }
+
+    @Override
+    public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Person person = (Person) o;
+		return Objects.equals(name, person.name) && Objects.equals(passportID, person.passportID)
+			&& Objects.equals(eyeColor, person.eyeColor) && Objects.equals(hairColor, person.hairColor)
+			&& Objects.equals(nationality, person.nationality);
+    }
+    
+    @Override
+    public int hashCode(){
+        return Objects.hash(name, passportID, eyeColor, hairColor, nationality);
+    }
 
     @Override
     public String toString() {
