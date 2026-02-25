@@ -1,5 +1,7 @@
 package proglab5.models;
 
+import java.util.Objects;
+
 import proglab5.utility.Validate;
 
 public class Coordinates implements Validate{
@@ -19,6 +21,19 @@ public class Coordinates implements Validate{
     
     public Double getX() { return x; }
     public Integer getY() { return y; }
+
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj) return true;
+        if(obj == null || getClass() != obj.getClass()) return false;
+        Coordinates that = (Coordinates) obj;
+        return x.equals(that.x) && y.equals(that.y);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(x,y);
+    }
 
     @Override
     public String toString(){
