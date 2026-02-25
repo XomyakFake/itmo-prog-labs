@@ -74,7 +74,7 @@ public class Movie implements Validate, Comparable<Movie> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, coordinates, creationDate, oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
+		return Objects.hash(id);
 	}
 
     @Override
