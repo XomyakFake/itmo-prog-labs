@@ -2,6 +2,7 @@ package proglab5.models;
 
 import proglab5.utility.Validate;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 public class Movie implements Validate, Comparable<Movie> {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
@@ -62,6 +63,19 @@ public class Movie implements Validate, Comparable<Movie> {
         if(this.oscarsCount < other.oscarsCount) return -1;
         return Integer.compare(this.id, other.id);
     }
+
+    @Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+		Movie that = (Movie) obj;
+		return Objects.equals(id, that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, coordinates, creationDate, oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
+	}
 
     @Override
     public String toString() {
