@@ -86,54 +86,87 @@ public class Ask {
     }
 
     public static Color askColor(Scanner scanner){
-        Color c;
+        Color[] values = Color.values();
         while(true){
-            System.out.print("Color (" + Color.names() + "): ");
+            System.out.print("Color (" + Color.names() + " или номер от 1 до " + values.length + "): ");
             var line = scanner.nextLine().strip();
             if(line.isEmpty()){
                 return null;
             }
             try{
-                c = Color.valueOf(line);
-                break;
+                int num = Integer.parseInt(line);
+                if(num >= 1 && num <= values.length){
+                    return values[num-1];
+                }
+                else{
+                    System.out.println("Число должно быть от 1 до " + values.length);
+                }
             }
-            catch(IllegalArgumentException e){
-                System.out.println("Такого цвета нет");
+            catch(NumberFormatException e){
+                try{
+                    return Color.valueOf(line);
+                }
+                catch(IllegalArgumentException ex){
+                    System.out.println("Такого цвета нет");
+                }
             }
         }
-        return c;
     }
 
     public static Country askCountry(Scanner scanner){
-        Country c;
+        Country[] values = Country.values();
         while(true){
-            System.out.print("County (" + Country.names() + "): ");
+            System.out.print("Country (" + Country.names() + " или номер от 1 до " + values.length + "): ");
             var line = scanner.nextLine().strip();
-            try{
-                c = Country.valueOf(line);
-                break;
+            if(line.isEmpty()){
+                return null;
             }
-            catch(IllegalArgumentException e){
-                System.out.println("Такой страны нет");
+            try{
+                int num = Integer.parseInt(line);
+                if(num >= 1 && num <= values.length){
+                    return values[num-1];
+                }
+                else{
+                    System.out.println("Число должно быть от 1 до " + values.length);
+                }
+            }
+            catch(NumberFormatException e){
+                try{
+                    return Country.valueOf(line);
+                }
+                catch(IllegalArgumentException ex){
+                    System.out.println("Такой страны нет");
+                }
             }
         }
-        return c;
     }
 
     public static MpaaRating askMpaaRating(Scanner scanner){
-        MpaaRating c;
+        MpaaRating[] values = MpaaRating.values();
         while(true){
-            System.out.print("MpaaRating (" + MpaaRating.names() + "): ");
+            System.out.print("MpaaRating (" + MpaaRating.names() + " или номер от 1 до " + values.length + "): ");
             var line = scanner.nextLine().strip();
-            try{
-                c = MpaaRating.valueOf(line);
-                break;
+            if(line.isEmpty()){
+                return null;
             }
-            catch(IllegalArgumentException e){
-                System.out.println("Такого нет");
+            try{
+                int num = Integer.parseInt(line);
+                if(num >= 1 && num <= values.length){
+                    return values[num-1];
+                }
+                else{
+                    System.out.println("Число должно быть от 1 до " + values.length);
+                }
+            }
+            catch(NumberFormatException e){
+                try{
+                    return MpaaRating.valueOf(line);
+                }
+                catch(IllegalArgumentException ex){
+                    System.out.println("Такого рейтинга нет");
+                }
             }
         }
-        return c;
     }
 
     public static Person askPerson(Scanner scanner, CollectionManager cm){
@@ -154,8 +187,8 @@ public class Ask {
                 continue;
             }
 
-            if(!cm.isUiquePassportId(line)){
-                System.out.println("Такой ID уже существует");
+            if(!cm.isUniquePassportId(line)){
+                System.out.println("Такой ID режисера уже существует");
                 continue;
             }
             passportID = line;
