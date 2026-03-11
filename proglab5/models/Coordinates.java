@@ -4,6 +4,11 @@ import java.util.Objects;
 
 import proglab5.utility.Validate;
 
+/**
+ * Класс координат
+ * @author XomyakFake
+ */
+
 public class Coordinates implements Validate{
     private Double x; //Максимальное значение поля: 567, Поле не может быть null
     private Integer y; //Максимальное значение поля: 631, Поле не может быть null
@@ -13,6 +18,20 @@ public class Coordinates implements Validate{
         this.y = y;
     }
 
+    public Coordinates(String s) {
+        try {
+            try {this.x = Double.parseDouble(s.split(";")[0]); } catch (NumberFormatException e) {this.x = null;}
+            try {this.y = Integer.parseInt(s.split(";")[1]); } catch (NumberFormatException e) {this.y = null;}
+        } 
+        catch (ArrayIndexOutOfBoundsException e) {}
+    }
+    
+    /**
+     * Валидация полей.
+     * @return true, если верно, иначе false
+    */
+    
+    @Override
     public boolean validate(){
         if(x == null || x > 567) return false;
         if(y == null || y > 631) return false;
