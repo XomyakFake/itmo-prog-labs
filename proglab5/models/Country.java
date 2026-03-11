@@ -1,5 +1,10 @@
 package proglab5.models;
 
+/**
+ * Перечисление стран.
+ * @author XomyakFake
+ */
+
 public enum Country {
     RUSSIA,
     CHINA,
@@ -7,12 +12,15 @@ public enum Country {
     SOUTH_KOREA,
     JAPAN;
 
+    /**
+     * @return Строка со всеми элементами enum через строку
+     */
+
     public static String names(){
-        StringBuilder namesList = new StringBuilder();
+        String namesList = "";
         for(var countryType : values()){
-            namesList.append(countryType.name()).append(", ");
+            namesList += countryType.name() + ", ";
         }
-        namesList.setLength(namesList.length() - 2);
-        return namesList.toString();
+        return namesList.substring(0, namesList.length() - 2);
     }
 }
