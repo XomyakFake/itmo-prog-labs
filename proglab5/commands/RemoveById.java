@@ -3,6 +3,10 @@ package proglab5.commands;
 import proglab5.managers.CollectionManager;
 import proglab5.models.Movie;
 
+/**
+ * Команда 'remove_by_id'. Удаляет элемент по его id
+ * @author XomyakFake
+ */
 public class RemoveById implements Command {  
     private final CollectionManager cm;
 
@@ -14,7 +18,19 @@ public class RemoveById implements Command {
     public String getName(){
         return "remove_by_id"; 
     }
-    
+
+    /**
+     * Описание команды
+     */
+    @Override
+    public String getDescription(){
+        return "{id} удалить элемент из коллекции по его id";
+    }
+
+    /**
+     * Выполняет команду
+     * @return Успешность выполнения команды.
+     */
     @Override
     public void execute(String... args) {  
         if(args[0].isEmpty()){
