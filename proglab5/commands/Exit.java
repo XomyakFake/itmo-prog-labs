@@ -1,5 +1,9 @@
 package proglab5.commands;
 
+/**
+ * Команда 'exit'. Завершает выполнение программы
+ * @author XomyakFake
+ */
 public class Exit implements Command {
 
     @Override 
@@ -7,6 +11,18 @@ public class Exit implements Command {
         return "exit";
     }
 
+    /**
+     * Описание команды
+     */
+    @Override
+    public String getDescription(){
+        return "завершить программу (без сохранения в файл)";
+    }
+
+    /**
+     * Выполняет команду
+     * @return Успешность выполнения команды.
+     */
     @Override
     public void execute(String... args){
         System.out.println("Завершение программы");
