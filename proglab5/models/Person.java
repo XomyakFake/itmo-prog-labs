@@ -4,6 +4,10 @@ import java.util.Objects;
 
 import proglab5.utility.Validate;
 
+/**
+ * Класс режиссера
+ * @author XomyakFake
+ */
 public class Person implements Validate {
     private String name; //Поле не может быть null, Строка не может быть пустой
     private String passportID; //Значение этого поля должно быть уникальным, Длина строки не должна быть больше 47, Строка не может быть пустой, Поле может быть null
@@ -19,11 +23,27 @@ public class Person implements Validate {
         this.nationality = nationality;
     }
 
+    public Person(String s) {
+    try {
+      this.name = s.split(";")[0];
+        try { this.passportID = s.split(";")[1].equals("null") ? null : s.split(";")[1]; } catch (NumberFormatException e) { return; }
+        try { this.eyeColor = Color.valueOf(s.split(";")[2]); } catch (IllegalArgumentException  e) { this.eyeColor = null; }
+        try { this.hairColor = Color.valueOf(s.split(";")[3]); } catch (IllegalArgumentException  e) { this.hairColor = null; }
+        try { this.nationality = Country.valueOf(s.split(";")[4]); } catch (IllegalArgumentException  e) { this.nationality = null; }
+    } 
+    catch (ArrayIndexOutOfBoundsException e) {}
+  }
+
+    /**
+     * Валидация полей.
+     * @return true, если верно, иначе false
+    */
+    @Override
     public boolean validate(){
         if(name == null || name.isEmpty()) return false;
         if(passportID != null && (passportID.length() > 47 || passportID.isEmpty())) return false;
         if(nationality == null) return false;
-            return true;
+        return true;
     }
 
     public String getName() { return name; }
