@@ -1,5 +1,10 @@
 package proglab5.models;
 
+/**
+ * Перечисление рейтингов.
+ * @author XomyakFake
+ */
+
 public enum MpaaRating {
     G,
     PG,
@@ -7,12 +12,15 @@ public enum MpaaRating {
     R,
     NC_17;
 
+   
+    /**
+    * @return Строка со всеми элементами enum через строку
+    */
     public static String names(){
-        StringBuilder namesList = new StringBuilder();
+        String namesList = "";
         for(var mpaaType : values()){
-            namesList.append(mpaaType.name()).append(", ");
+            namesList += mpaaType.name() + ", ";
         }
-        namesList.setLength(namesList.length() - 2);
-        return namesList.toString();
+        return namesList.substring(0, namesList.length() - 2);
     }
 }
