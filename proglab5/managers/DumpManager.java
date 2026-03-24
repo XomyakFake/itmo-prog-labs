@@ -35,6 +35,8 @@ public class DumpManager {
             OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
             CSVWriter writer = new CSVWriter(osw, ',');
         ){
+
+
             for(Movie movie : collection.getCollection()){
                 writer.writeNext(Movie.toArray(movie));
             }

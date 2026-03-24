@@ -19,7 +19,7 @@ public enum MpaaRating {
     public static String names(){
         String namesList = "";
         for(var mpaaType : values()){
-            namesList += mpaaType.name() + ", ";
+            namesList += mpaaType.ordinal()+1 + "| " + mpaaType.name() + ", ";
         }
         return namesList.substring(0, namesList.length() - 2);
     }

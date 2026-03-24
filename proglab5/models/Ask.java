@@ -26,7 +26,7 @@ public class Ask {
                 System.out.println("Значение должно быть больше 0");
             } 
             catch (NumberFormatException e) {
-                System.out.println("Введите число");
+                System.out.println("Введите число значение которого больше 0d");
             }
         }
 
@@ -40,7 +40,7 @@ public class Ask {
                 System.out.println("Значение должно быть больше 0");
             } 
             catch (NumberFormatException e) {
-                System.out.println("Введите число");
+                System.out.println("Введите число значение которого больше 0");
             }
         }
 
@@ -66,7 +66,7 @@ public class Ask {
                 System.out.println("Значение должно быть не больше 567");
             }
             catch(NumberFormatException e){
-                System.out.println("Введите число");
+                System.out.println("Введите число значение которого не больше 567");
             }
         }
         Integer y;
@@ -79,7 +79,7 @@ public class Ask {
                 System.out.println("Значение должно быть не больше 631");
             }
             catch(NumberFormatException e){
-                System.out.println("Введите число");
+                System.out.println("Введите число значение которого не больше 631");
             }
         }
         return new Coordinates(x,y);
@@ -88,7 +88,7 @@ public class Ask {
     public static Color askColor(Scanner scanner){
         Color[] values = Color.values();
         while(true){
-            System.out.print("Color (" + Color.names() + " или номер от 1 до " + values.length + "): ");
+            System.out.print("Color (" + Color.names() + "): ");
             var line = scanner.nextLine().strip();
             if(line.isEmpty()){
                 return null;
@@ -116,7 +116,7 @@ public class Ask {
     public static Country askCountry(Scanner scanner){
         Country[] values = Country.values();
         while(true){
-            System.out.print("Country (" + Country.names() + " или номер от 1 до " + values.length + "): ");
+            System.out.print("Country (" + Country.names() + "): ");
             var line = scanner.nextLine().strip();
             if(line.isEmpty()){
                 return null;
@@ -144,7 +144,7 @@ public class Ask {
     public static MpaaRating askMpaaRating(Scanner scanner){
         MpaaRating[] values = MpaaRating.values();
         while(true){
-            System.out.print("MpaaRating (" + MpaaRating.names() + " или номер от 1 до " + values.length + "): ");
+            System.out.print("MpaaRating (" + MpaaRating.names() + "): ");
             var line = scanner.nextLine().strip();
             if(line.isEmpty()){
                 return null;

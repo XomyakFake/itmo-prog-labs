@@ -19,7 +19,7 @@ public enum Country {
     public static String names(){
         String namesList = "";
         for(var countryType : values()){
-            namesList += countryType.name() + ", ";
+            namesList += countryType.ordinal()+1 + "| " + countryType.name() + ", ";
         }
         return namesList.substring(0, namesList.length() - 2);
     }

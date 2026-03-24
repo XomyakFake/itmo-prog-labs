@@ -20,7 +20,7 @@ public enum Color {
     public static String names(){
         String namesList = "";
         for(var colorType : values()){
-            namesList += colorType.name() + ", ";
+            namesList += colorType.ordinal()+1 + "| " + colorType.name() + ", ";
         }
         return namesList.substring(0, namesList.length() - 2);
     }

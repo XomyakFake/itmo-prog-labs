@@ -194,9 +194,7 @@ public class Movie implements Validate, Comparable<Movie> {
 
     @Override
     public int compareTo(Movie other){
-        if(this.oscarsCount > other.oscarsCount) return 1;
-        if(this.oscarsCount < other.oscarsCount) return -1;
-        return Integer.compare(this.id, other.id);
+        return Long.compare(this.oscarsCount, other.oscarsCount);
     }
 
     @Override
