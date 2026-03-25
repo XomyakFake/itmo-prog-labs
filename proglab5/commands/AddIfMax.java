@@ -59,10 +59,7 @@ public class AddIfMax implements Command {
         if(!movie.validate()){
             System.out.println("Некоректный ввод фильма");
         }
-        else if(cm.getCollection().isEmpty()){
-            cm.addMovie(movie);
-            System.out.println("Фильм добавлен");
-        }
+
         else if((Collections.max(cm.getCollection())).compareTo(movie) < 0){
             cm.addMovie(movie);
             System.out.println("Фильм добавлен");
