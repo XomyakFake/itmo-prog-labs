@@ -4,6 +4,7 @@
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
+                TEST_PATTERN %msg%n
                 %d{HH:mm:ss} [%t] %-5level %logger{36} [%X{requestId}] - %msg%n
             </pattern>
         </encoder>
