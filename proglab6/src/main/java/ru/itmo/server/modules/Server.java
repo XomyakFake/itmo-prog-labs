@@ -10,6 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -26,6 +28,8 @@ public class Server {
     private Logger logger = LoggerFactory.getLogger(Server.class);;
     private Request request;
     private Response response;
+    private Map<String, byte[]> reqIds = new LinkedHashMap<>();
+    private final int maxSize = 100;
 
     public Server(InetSocketAddress address){
         this.address = address;
@@ -95,23 +99,36 @@ public class Server {
                             try{
                                 ObjectInputStream clientData = new ObjectInputStream(new ByteArrayInputStream(data));
                                 request = (Request) clientData.readObject();
-                                
-                                MDC.put("requestId", request.getRequestId().toString());
+
+                                if(reqIds.containsKey(request.getRequestId().toString())){
+                                    logger.info("Повторная отправка ответа");
+                                    channel.send(ByteBuffer.wrap(reqIds.get(request.getRequestId().toString())), clientAddress);
+                                }
+                                else{                                
+                                    MDC.put("requestId", request.getRequestId().toString());
+
+                                    logger.info("Команда получена {} от {}", request.getCommandName(), clientAddress);
+                                    
+
+                                    response = commandinvoker.execute(request);
+                                    response.setResponseId(request.getRequestId());
+                                    logger.info("Комманда {} выполнена", request.getCommandName());
+
+                                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                    ObjectOutputStream oos = new ObjectOutputStream(baos);
+                                    oos.writeObject(response);
+                                    oos.flush();
+                                    byte[] responseData = baos.toByteArray();
 
 
-                                logger.info("Команда получена {} от {}", request.getCommandName(), clientAddress);
-                                response = commandinvoker.execute(request);
-                                logger.info("Комманда {} выполнена", request.getCommandName());
-
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                                oos.writeObject(response);
-                                oos.flush();
-                                byte[] responseData = baos.toByteArray();
-
-
-                                channel.send(ByteBuffer.wrap(responseData), clientAddress);
-                                logger.info("Ответ отправлен клиенту {}", clientAddress);
+                                    channel.send(ByteBuffer.wrap(responseData), clientAddress);
+                                    if(reqIds.size() > maxSize){
+                                        String old = reqIds.keySet().iterator().next();
+                                        reqIds.remove(old);
+                                    }
+                                    reqIds.put(request.getRequestId().toString(), responseData);
+                                    logger.info("Ответ отправлен клиенту {}", clientAddress);
+                                }
 
                             }
                             catch(Exception e){
