@@ -30,6 +30,7 @@ public class Client {
     private Response response;
     private Request request;
     private static final Set<String> executingScripts = new HashSet<>();
+    private int attempts = 2;
 
     public Client(InetAddress host, int port){
         this.host = host;
@@ -123,21 +124,40 @@ private void ClientCommand(String command, String args){
             oos.writeObject(request);
             oos.flush();
             byte[] object = baos.toByteArray();
+            
+            boolean received = false;
+            for(int i = 0; i < attempts; i++){
+                try{
+                    DatagramPacket sendPacket = new DatagramPacket(object, object.length, host, port);
+                    socket.send(sendPacket);
 
-            DatagramPacket sendPacket = new DatagramPacket(object, object.length, host, port);
-            socket.send(sendPacket);
+                    byte[] receiveBytes = new byte[2048];
+                    DatagramPacket receivePacket = new DatagramPacket(receiveBytes, receiveBytes.length);
+                    
+                    socket.setSoTimeout(3000);
+                    socket.receive(receivePacket);
 
-            byte[] receiveBytes = new byte[2048];
-            DatagramPacket receivePacket = new DatagramPacket(receiveBytes, receiveBytes.length);
-            socket.receive(receivePacket);
-            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(receiveBytes, 0, receivePacket.getLength()));
-            response = (Response) ois.readObject();
+                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(receiveBytes, 0, receivePacket.getLength()));
+                    response = (Response) ois.readObject();
 
-            if(response.isSuccess()){
+                    if(response.getResponseId().equals(request.getRequestId())){
+                        received = true;
+                        break;
+                    }
+                }
+                catch(SocketTimeoutException e){
+                    System.out.println("Ответ от сервера не был получен. Попытка №" + (i+1));
+                }
+            }
+
+            if(response.isSuccess() && received){
                 System.out.println(response.getMessage());
                 if(response.getCollection() != null){
                     System.out.println(response.getCollection());
                 }
+            }
+            else if(!received){
+                System.out.println("Запрос не обработан");
             }
             else{
                 System.out.println("Ошибка сервера");
