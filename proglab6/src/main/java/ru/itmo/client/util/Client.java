@@ -68,7 +68,7 @@ public class Client {
     }
 
 
-private void ClientCommand(String command, String args){
+    private void ClientCommand(String command, String args){
         request = null;
 
         if(command.equals("exit")){
@@ -179,7 +179,7 @@ private void ClientCommand(String command, String args){
             return;
         }
         Path path = Path.of(file);
-                if(!Files.exists(path)){
+        if(!Files.exists(path)){
             System.out.println("Такого файла нет");
             return;
         }
