@@ -1,11 +1,13 @@
 package ru.itmo.server.modules;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -15,9 +17,31 @@ import org.slf4j.Logger;
 public class Server {
     private InetSocketAddress address;
     private Logger logger = LoggerFactory.getLogger(Server.class);;
+    private static final int PACKET_SIZE = 60000;
+    private static final int DATA_SIZE = PACKET_SIZE - 1; 
 
     public Server(InetSocketAddress address){
         this.address = address;
+    }
+
+    private void sendChunks(DatagramChannel channel, byte[] responseData, SocketAddress clientAddress) throws IOException{
+        int n = (int) Math.ceil((double) responseData.length / 60000);
+        for(int i = 0; i < n; i++){
+            int from = i * DATA_SIZE;
+            int to = Math.min((int)(from + DATA_SIZE), (int)(responseData.length)) ;
+            byte[] chunk = Arrays.copyOfRange(responseData, from, to);
+            byte[] packet = new byte[chunk.length + 1];
+            System.arraycopy(chunk, 0, packet, 0, chunk.length);
+            if(i == n-1){
+                packet[packet.length-1] = 1;
+            }
+            else{
+                packet[packet.length-1] = 0;
+            }
+            channel.send(ByteBuffer.wrap(packet), clientAddress);
+
+        }
+
     }
 
     public void run(){
@@ -42,7 +66,7 @@ public class Server {
             channel.register(selector, SelectionKey.OP_READ);
             
 
-            ByteBuffer buffer = ByteBuffer.allocate(2048); //сервер выделяет размер но такого не должно быть
+            ByteBuffer buffer = ByteBuffer.allocate(65507); //сервер выделяет размер но такого не должно быть
 
 
             while(true){
@@ -73,8 +97,7 @@ public class Server {
                             buffer.get(data);
 
                             byte[] responseData = requestHandler.handle(data, clientAddress.toString());
-
-                            channel.send(ByteBuffer.wrap(responseData), clientAddress); 
+                            sendChunks(channel, responseData, clientAddress);
 
                         }
                     }

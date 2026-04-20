@@ -3,6 +3,7 @@ package ru.itmo.client.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -36,6 +37,20 @@ public class Client {
         this.host = host;
         this.port = port;
         this.scanner = new Scanner(System.in);
+    }
+
+    private byte[] receiveChunks(DatagramSocket socket) throws IOException{
+        ByteArrayOutputStream chunks = new ByteArrayOutputStream();
+        while(true){
+            byte[] buf = new byte[60001];
+            DatagramPacket receivePacket = new DatagramPacket(buf, buf.length);
+            socket.receive(receivePacket);
+
+            boolean isLast = (buf[receivePacket.getLength() - 1] == 1) ? true : false;
+            chunks.write(buf, 0, receivePacket.getLength() - 1);
+            if(isLast) break;
+        }
+        return chunks.toByteArray();
     }
 
     public void run(){
@@ -130,14 +145,11 @@ public class Client {
                 try{
                     DatagramPacket sendPacket = new DatagramPacket(object, object.length, host, port);
                     socket.send(sendPacket);
-
-                    byte[] receiveBytes = new byte[2048];
-                    DatagramPacket receivePacket = new DatagramPacket(receiveBytes, receiveBytes.length);
-                    
                     socket.setSoTimeout(3000);
-                    socket.receive(receivePacket);
 
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(receiveBytes, 0, receivePacket.getLength()));
+                    byte[] receiveBytes = receiveChunks(socket);
+
+                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(receiveBytes, 0, receiveBytes.length));
                     response = (Response) ois.readObject();
 
                     if(response.getResponseId().equals(request.getRequestId())){
