@@ -66,13 +66,7 @@ public class Server {
             channel.register(selector, SelectionKey.OP_READ);
             
 
-<<<<<<< HEAD
             ByteBuffer buffer = ByteBuffer.allocate(65507); 
-=======
-            ByteBuffer buffer = ByteBuffer.allocate(65507);
-
-
->>>>>>> ad9ba44 (Update)
             while(true){
                 if(System.in.available() > 0){
                     String command = scanner.nextLine();
@@ -116,8 +110,3 @@ public class Server {
     }
 }
 
-
-<<<<<<< HEAD
-
-=======
->>>>>>> ad9ba44 (Update)
