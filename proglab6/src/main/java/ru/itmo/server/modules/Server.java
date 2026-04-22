@@ -66,9 +66,7 @@ public class Server {
             channel.register(selector, SelectionKey.OP_READ);
             
 
-            ByteBuffer buffer = ByteBuffer.allocate(65507); //сервер выделяет размер но такого не должно быть
-
-
+            ByteBuffer buffer = ByteBuffer.allocate(65507); 
             while(true){
                 if(System.in.available() > 0){
                     String command = scanner.nextLine();
@@ -114,8 +112,3 @@ public class Server {
 
 
 
-
-
-//
-//декомпозиция сервера
-//разбить на пакеты тоесть получать и отдавать байты если много 
