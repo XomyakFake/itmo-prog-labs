@@ -1,3 +1,0 @@
-execute_script script-1.txt
-remove_by_id 1
-show
