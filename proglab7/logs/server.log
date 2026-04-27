@@ -1,0 +1,130 @@
+03:45:38 [main] WARN  ru.itmo.server.modules.DumpManager [] - В файле ничего нет
+03:45:38 [main] INFO  ru.itmo.server.modules.Server [] - Сервер начал работу
+03:45:38 [main] INFO  ru.itmo.server.modules.Server [] - Сервер запущен на 0.0.0.0/0.0.0.0:8000
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [9ec21960-de41-4e12-bc97-074fe507fc95] - Команда получена help от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [9ec21960-de41-4e12-bc97-074fe507fc95] - Выполнение команды help
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [9ec21960-de41-4e12-bc97-074fe507fc95] - Комманда help выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [9ec21960-de41-4e12-bc97-074fe507fc95] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [82040543-cd67-4f5c-9220-669b77716d8e] - Команда получена info от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [82040543-cd67-4f5c-9220-669b77716d8e] - Выполнение команды info
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [82040543-cd67-4f5c-9220-669b77716d8e] - Комманда info выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [82040543-cd67-4f5c-9220-669b77716d8e] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [df986378-1bee-4b04-8092-56036e56ba0e] - Команда получена show от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [df986378-1bee-4b04-8092-56036e56ba0e] - Выполнение команды show
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [df986378-1bee-4b04-8092-56036e56ba0e] - Комманда show выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [df986378-1bee-4b04-8092-56036e56ba0e] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [1b365d90-651a-4ec2-b9a6-0fce6b6eb1f9] - Команда получена show от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [1b365d90-651a-4ec2-b9a6-0fce6b6eb1f9] - Выполнение команды show
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [1b365d90-651a-4ec2-b9a6-0fce6b6eb1f9] - Комманда show выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [1b365d90-651a-4ec2-b9a6-0fce6b6eb1f9] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [36875688-af3d-4927-b346-a02cd5b30337] - Команда получена filter_greater_than_mpaa_rating от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [36875688-af3d-4927-b346-a02cd5b30337] - Выполнение команды filter_greater_than_mpaa_rating
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [36875688-af3d-4927-b346-a02cd5b30337] - Комманда filter_greater_than_mpaa_rating выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [36875688-af3d-4927-b346-a02cd5b30337] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [9a265f49-28f7-4e80-a8f6-6327258df1fd] - Команда получена remove_by_id от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [9a265f49-28f7-4e80-a8f6-6327258df1fd] - Выполнение команды remove_by_id
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [9a265f49-28f7-4e80-a8f6-6327258df1fd] - Комманда remove_by_id выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [9a265f49-28f7-4e80-a8f6-6327258df1fd] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [69722cb2-2050-4d34-9543-c1844a63a0e7] - Команда получена show от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [69722cb2-2050-4d34-9543-c1844a63a0e7] - Выполнение команды show
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [69722cb2-2050-4d34-9543-c1844a63a0e7] - Комманда show выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [69722cb2-2050-4d34-9543-c1844a63a0e7] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [61898140-2e4c-4215-a626-30e5bbb2f000] - Команда получена update от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [61898140-2e4c-4215-a626-30e5bbb2f000] - Выполнение команды update
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [61898140-2e4c-4215-a626-30e5bbb2f000] - Комманда update выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [61898140-2e4c-4215-a626-30e5bbb2f000] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [050a2d22-c8d8-4059-ae70-705ed7f354c0] - Команда получена remove_greater от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [050a2d22-c8d8-4059-ae70-705ed7f354c0] - Выполнение команды remove_greater
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [050a2d22-c8d8-4059-ae70-705ed7f354c0] - Комманда remove_greater выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [050a2d22-c8d8-4059-ae70-705ed7f354c0] - Ответ отправлен клиенту /127.0.0.1:40584
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [773749df-318d-4648-be9d-5a25e111d99d] - Команда получена history от /127.0.0.1:40584
+03:45:44 [main] INFO  r.itmo.server.modules.CommandInvoker [773749df-318d-4648-be9d-5a25e111d99d] - Выполнение команды history
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [773749df-318d-4648-be9d-5a25e111d99d] - Комманда history выполнена
+03:45:44 [main] INFO  ru.itmo.server.modules.Server [773749df-318d-4648-be9d-5a25e111d99d] - Ответ отправлен клиенту /127.0.0.1:40584
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [143adaae-99d1-40cd-a466-5e9a913e7cb1] - Команда получена clear от /127.0.0.1:60776
+03:47:11 [main] INFO  r.itmo.server.modules.CommandInvoker [143adaae-99d1-40cd-a466-5e9a913e7cb1] - Выполнение команды clear
+03:47:11 [main] INFO  r.i.server.modules.CollectionManager [143adaae-99d1-40cd-a466-5e9a913e7cb1] - Коллекция очищена
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [143adaae-99d1-40cd-a466-5e9a913e7cb1] - Комманда clear выполнена
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [143adaae-99d1-40cd-a466-5e9a913e7cb1] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [aea62a66-15c2-4e43-ae92-35662f3e82bf] - Команда получена show от /127.0.0.1:60776
+03:47:11 [main] INFO  r.itmo.server.modules.CommandInvoker [aea62a66-15c2-4e43-ae92-35662f3e82bf] - Выполнение команды show
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [aea62a66-15c2-4e43-ae92-35662f3e82bf] - Комманда show выполнена
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [aea62a66-15c2-4e43-ae92-35662f3e82bf] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:11 [main] INFO  ru.itmo.server.modules.Server [eebc1a92-5712-4d2e-861f-ef0725ff3323] - Команда получена add_if_max от /127.0.0.1:60776
+03:47:11 [main] INFO  r.itmo.server.modules.CommandInvoker [eebc1a92-5712-4d2e-861f-ef0725ff3323] - Выполнение команды add_if_max
+03:47:11 [main] ERROR ru.itmo.server.modules.Server [eebc1a92-5712-4d2e-861f-ef0725ff3323] - Ошибка при обработке запроса 
+java.util.NoSuchElementException: null
+	at java.base/java.util.HashMap$HashIterator.nextNode(HashMap.java:1599)
+	at java.base/java.util.HashMap$KeyIterator.next(HashMap.java:1620)
+	at java.base/java.util.Collections.max(Collections.java:674)
+	at ru.itmo.server.commands.AddIfMax.execute(AddIfMax.java:46)
+	at ru.itmo.server.modules.CommandInvoker.execute(CommandInvoker.java:48)
+	at ru.itmo.server.modules.Server.run(Server.java:113)
+	at ru.itmo.server.Main.main(Main.java:10)
+03:47:14 [main] INFO  ru.itmo.server.modules.Server [eebc1a92-5712-4d2e-861f-ef0725ff3323] - Команда получена add_if_max от /127.0.0.1:60776
+03:47:14 [main] INFO  r.itmo.server.modules.CommandInvoker [eebc1a92-5712-4d2e-861f-ef0725ff3323] - Выполнение команды add_if_max
+03:47:14 [main] ERROR ru.itmo.server.modules.Server [eebc1a92-5712-4d2e-861f-ef0725ff3323] - Ошибка при обработке запроса 
+java.util.NoSuchElementException: null
+	at java.base/java.util.HashMap$HashIterator.nextNode(HashMap.java:1599)
+	at java.base/java.util.HashMap$KeyIterator.next(HashMap.java:1620)
+	at java.base/java.util.Collections.max(Collections.java:674)
+	at ru.itmo.server.commands.AddIfMax.execute(AddIfMax.java:46)
+	at ru.itmo.server.modules.CommandInvoker.execute(CommandInvoker.java:48)
+	at ru.itmo.server.modules.Server.run(Server.java:113)
+	at ru.itmo.server.Main.main(Main.java:10)
+03:47:17 [main] INFO  ru.itmo.server.modules.Server [16ebd726-702c-437b-8e3a-5d5160699695] - Команда получена add_if_max от /127.0.0.1:60776
+03:47:17 [main] INFO  r.itmo.server.modules.CommandInvoker [16ebd726-702c-437b-8e3a-5d5160699695] - Выполнение команды add_if_max
+03:47:17 [main] ERROR ru.itmo.server.modules.Server [16ebd726-702c-437b-8e3a-5d5160699695] - Ошибка при обработке запроса 
+java.util.NoSuchElementException: null
+	at java.base/java.util.HashMap$HashIterator.nextNode(HashMap.java:1599)
+	at java.base/java.util.HashMap$KeyIterator.next(HashMap.java:1620)
+	at java.base/java.util.Collections.max(Collections.java:674)
+	at ru.itmo.server.commands.AddIfMax.execute(AddIfMax.java:46)
+	at ru.itmo.server.modules.CommandInvoker.execute(CommandInvoker.java:48)
+	at ru.itmo.server.modules.Server.run(Server.java:113)
+	at ru.itmo.server.Main.main(Main.java:10)
+03:47:20 [main] INFO  ru.itmo.server.modules.Server [16ebd726-702c-437b-8e3a-5d5160699695] - Команда получена add_if_max от /127.0.0.1:60776
+03:47:20 [main] INFO  r.itmo.server.modules.CommandInvoker [16ebd726-702c-437b-8e3a-5d5160699695] - Выполнение команды add_if_max
+03:47:20 [main] ERROR ru.itmo.server.modules.Server [16ebd726-702c-437b-8e3a-5d5160699695] - Ошибка при обработке запроса 
+java.util.NoSuchElementException: null
+	at java.base/java.util.HashMap$HashIterator.nextNode(HashMap.java:1599)
+	at java.base/java.util.HashMap$KeyIterator.next(HashMap.java:1620)
+	at java.base/java.util.Collections.max(Collections.java:674)
+	at ru.itmo.server.commands.AddIfMax.execute(AddIfMax.java:46)
+	at ru.itmo.server.modules.CommandInvoker.execute(CommandInvoker.java:48)
+	at ru.itmo.server.modules.Server.run(Server.java:113)
+	at ru.itmo.server.Main.main(Main.java:10)
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [e6bc2513-e4a3-4b52-bf38-83cdce92e6bc] - Команда получена filter_greater_than_mpaa_rating от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [e6bc2513-e4a3-4b52-bf38-83cdce92e6bc] - Выполнение команды filter_greater_than_mpaa_rating
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [e6bc2513-e4a3-4b52-bf38-83cdce92e6bc] - Комманда filter_greater_than_mpaa_rating выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [e6bc2513-e4a3-4b52-bf38-83cdce92e6bc] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [306cecb8-e739-4ad6-8a89-992e30d97066] - Команда получена print_descending от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [306cecb8-e739-4ad6-8a89-992e30d97066] - Выполнение команды print_descending
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [306cecb8-e739-4ad6-8a89-992e30d97066] - Комманда print_descending выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [306cecb8-e739-4ad6-8a89-992e30d97066] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [be6577e6-5e30-4e1a-a2a0-9e3bf14991e4] - Команда получена print_field_descending_tagline от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [be6577e6-5e30-4e1a-a2a0-9e3bf14991e4] - Выполнение команды print_field_descending_tagline
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [be6577e6-5e30-4e1a-a2a0-9e3bf14991e4] - Комманда print_field_descending_tagline выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [be6577e6-5e30-4e1a-a2a0-9e3bf14991e4] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [cda62ff9-6c43-4585-a262-e0daac0b0ffd] - Команда получена add от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [cda62ff9-6c43-4585-a262-e0daac0b0ffd] - Выполнение команды add
+03:47:23 [main] INFO  r.i.server.modules.CollectionManager [cda62ff9-6c43-4585-a262-e0daac0b0ffd] - Фильм с ID=1 добавлен
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [cda62ff9-6c43-4585-a262-e0daac0b0ffd] - Комманда add выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [cda62ff9-6c43-4585-a262-e0daac0b0ffd] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [bfb0c652-46ff-47c3-a3e5-f6adf648840e] - Команда получена add от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [bfb0c652-46ff-47c3-a3e5-f6adf648840e] - Выполнение команды add
+03:47:23 [main] INFO  r.i.server.modules.CollectionManager [bfb0c652-46ff-47c3-a3e5-f6adf648840e] - Фильм с ID=2 добавлен
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [bfb0c652-46ff-47c3-a3e5-f6adf648840e] - Комманда add выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [bfb0c652-46ff-47c3-a3e5-f6adf648840e] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [b3c5a1f9-6224-4cd6-8bc6-1a751f233a92] - Команда получена show от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [b3c5a1f9-6224-4cd6-8bc6-1a751f233a92] - Выполнение команды show
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [b3c5a1f9-6224-4cd6-8bc6-1a751f233a92] - Комманда show выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [b3c5a1f9-6224-4cd6-8bc6-1a751f233a92] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [8956d1a2-54fb-4949-a581-eb8bdbbfb6c9] - Команда получена show от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [8956d1a2-54fb-4949-a581-eb8bdbbfb6c9] - Выполнение команды show
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [8956d1a2-54fb-4949-a581-eb8bdbbfb6c9] - Комманда show выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [8956d1a2-54fb-4949-a581-eb8bdbbfb6c9] - Ответ отправлен клиенту /127.0.0.1:60776
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [3f46ad4d-69af-44d0-91f0-b673376538c4] - Команда получена show от /127.0.0.1:60776
+03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [3f46ad4d-69af-44d0-91f0-b673376538c4] - Выполнение команды show
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [3f46ad4d-69af-44d0-91f0-b673376538c4] - Комманда show выполнена
+03:47:23 [main] INFO  ru.itmo.server.modules.Server [3f46ad4d-69af-44d0-91f0-b673376538c4] - Ответ отправлен клиенту /127.0.0.1:60776
