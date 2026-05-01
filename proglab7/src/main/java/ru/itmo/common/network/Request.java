@@ -7,11 +7,13 @@ public class Request implements Serializable {
     private String commandName;
     private Serializable commandArg;
     private UUID requestId;
+    private User user;
 
-    public Request(String commandName, Serializable commandArg){
+    public Request(String commandName, Serializable commandArg, User user) {
         this.requestId = UUID.randomUUID();
         this.commandArg = commandArg;
         this.commandName = commandName;
+        this.user = user;
 
     }
 
@@ -23,6 +25,9 @@ public class Request implements Serializable {
     }
     public Serializable getCommandArg(){
         return commandArg;
+    }
+    public User getUser(){
+        return user;
     }
     
 }
