@@ -17,11 +17,9 @@ import java.time.ZonedDateTime;
 public class CollectionManager {
     private final HashSet<Movie> collection = new HashSet<>();
     private final ZonedDateTime initializationTime = ZonedDateTime.now();
-    private final DumpManager dumpManager;
     private Logger logger = LoggerFactory.getLogger(CollectionManager.class);
 
-    public CollectionManager(DumpManager dumpManager){
-        this.dumpManager = dumpManager;
+    public CollectionManager(){
     }
 
 
@@ -95,19 +93,4 @@ public class CollectionManager {
         if(passportID == null) return true;
         return collection.stream().filter(movie -> movie.getDirector() != null).noneMatch(movie -> passportID.equals(movie.getDirector().getPassportID()));
     }
-
-    /**
-     * Сохраняет коллекцию в CSV файл
-     */
-    public void saveCollection(){
-        dumpManager.writeCollection(this);
-    }
-
-    /**
-     * Загружает коллекцию из CSV файла
-     */
-    public void loadCollection(){
-        dumpManager.readCollection(this);
-    }
-
 }

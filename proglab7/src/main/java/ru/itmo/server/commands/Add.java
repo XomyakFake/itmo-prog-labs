@@ -5,6 +5,7 @@ import ru.itmo.common.models.*;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
+import ru.itmo.server.modules.DatabaseManager;
 
 /**
  * Команда 'add'. Добавляет новый элемент в коллекцию
@@ -12,8 +13,10 @@ import ru.itmo.server.modules.CollectionManager;
  */
 public class Add implements Command {
     private final CollectionManager cm;
+    private final DatabaseManager dm;
 
-    public Add(CollectionManager cm){
+    public Add(CollectionManager cm, DatabaseManager dm) {
+        this.dm = dm;
         this.cm = cm;
     }
 
@@ -38,7 +41,8 @@ public class Add implements Command {
     public Response execute(Request request){
         try{
             Movie movie = (Movie) request.getCommandArg();
-            movie.setId(cm.generateId());
+            int id = dm.addMovie(movie, request.getUser().getUsername());
+            movie.setId(id);
             cm.addMovie(movie);
             return new Response(true, "Фильм добавлен", null);
         }

@@ -45,15 +45,16 @@ public class Server {
     }
 
     public void run(){
+        DatabaseManager dm = new DatabaseManager();
+        dm.establishConnection();
         CommandInvoker commandinvoker = new CommandInvoker();
-        DumpManager dumpManager = new DumpManager();
-        CollectionManager collectionmanager = new CollectionManager(dumpManager);
-        collectionmanager.loadCollection();
+        CollectionManager collectionmanager = new CollectionManager();
+        dm.readCollection(collectionmanager);
 
-        CommandRegistr.register(commandinvoker, collectionmanager);
+        CommandRegistr.register(commandinvoker, collectionmanager, dm);
 
         StorageCommands storage = new StorageCommands();
-        RequestHandler requestHandler = new RequestHandler(commandinvoker, storage);
+        RequestHandler requestHandler = new RequestHandler(commandinvoker, storage, dm);
 
         logger.info("Сервер начал работу");
         logger.info("Сервер запущен на {}", address);
@@ -70,11 +71,7 @@ public class Server {
             while(true){
                 if(System.in.available() > 0){
                     String command = scanner.nextLine();
-                    if(command.equals("save")){
-                        collectionmanager.saveCollection();
-                    }
                     if(command.equals("exit")){
-                        collectionmanager.saveCollection();
                         logger.info("Сервер завершил работу");
                         System.exit(0);
                     }

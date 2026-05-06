@@ -8,6 +8,7 @@ public class Request implements Serializable {
     private Serializable commandArg;
     private UUID requestId;
     private User user;
+    private boolean isRegister;
 
     public Request(String commandName, Serializable commandArg, User user) {
         this.requestId = UUID.randomUUID();
@@ -15,6 +16,12 @@ public class Request implements Serializable {
         this.commandName = commandName;
         this.user = user;
 
+    }
+    public Request(User user, boolean isRegister){
+        this.requestId = UUID.randomUUID();
+        this.user = user;
+        this.isRegister = isRegister;
+        this.commandName = null;
     }
 
     public UUID getRequestId(){
@@ -28,6 +35,9 @@ public class Request implements Serializable {
     }
     public User getUser(){
         return user;
+    }
+    public boolean isRegister(){
+        return isRegister;
     }
     
 }

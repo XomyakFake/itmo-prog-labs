@@ -9,11 +9,10 @@ import ru.itmo.server.modules.CollectionManager;
  * @author XomyakFake
  */
 public class Exit implements Command {
-    private CollectionManager cm;
 
-    public Exit(CollectionManager cm){
-        this.cm = cm;
+    public Exit(){
     }
+    
     @Override 
     public String getName(){
         return "exit";
@@ -33,7 +32,6 @@ public class Exit implements Command {
      */
     @Override
     public Response execute(Request request){
-        cm.saveCollection();
         System.exit(0);
         return new Response(true, "Завершение работы сервера и сохранение коллекции", null);
 

@@ -4,7 +4,7 @@ CREATE TYPE Country AS ENUM ('RUSSIA', 'CHINA', 'THAILAND', 'SOUTH_KOREA', 'JAPA
 
 CREATE TABLE IF NOT EXISTS users(
     username TEXT PRIMARY KEY,
-    hashed_password TEXT NOT NULL
+    hashedPassword TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS movies(
@@ -17,10 +17,10 @@ CREATE TABLE IF NOT EXISTS movies(
     goldenPalmCount BIGINT NOT NULL,
     tagline TEXT,
     mpaarating MpaaRating NOT NULL,
-    director_name TEXT,
-    director_passportid TEXT,
-    director_eyecolor Color,
-    director_haircolor Color,
-    director_nationality Country,
+    directorName TEXT,
+    directorPassportId TEXT,
+    directorEyecolor Color,
+    directorHaircolor Color,
+    directorNationality Country,
     owner TEXT REFERENCES users(username)
 );

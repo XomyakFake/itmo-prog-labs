@@ -22,6 +22,7 @@ import java.util.Set;
 import ru.itmo.common.models.Movie;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
+import ru.itmo.common.network.User;
 
 public class Client {
     private InetAddress host;
@@ -32,6 +33,7 @@ public class Client {
     private Request request;
     private static final Set<String> executingScripts = new HashSet<>();
     private int attempts = 2;
+    private User user;
 
     public Client(InetAddress host, int port){
         this.host = host;
@@ -58,6 +60,8 @@ public class Client {
             socket = new DatagramSocket();
             socket.setSoTimeout(5000);
             System.out.println("Запуск клиентского приложения");
+            authenticateUser();
+
             while(true){
                 try{
                     if(!scanner.hasNextLine()) break;
@@ -82,8 +86,77 @@ public class Client {
         }
     }
 
+    public void authenticateUser(){
+        var username = "";
+        var password = "";
+        try{
+            while(true){
+                System.out.println("Введите логин: ");
+                username = scanner.nextLine();
+                System.out.println("Введите пароль: ");
+                password = scanner.nextLine();
+
+                user = new User(username, PasswordHasher.getHash(password));
+                var userAuthenticationRequest = new Request(user, false);
+                SendAndReceive(userAuthenticationRequest);
+                if(response.isSuccess()){
+                    printResponse(response);
+                    break;
+                }
+                else{
+                    printResponse(response);
+                    if(response.getMessage().equals("Пользователя " + user.getUsername() + " не существует")){
+                        System.out.println("Если вы хотите зарегистрироваться, нажмите 'y'");
+                        var ans = scanner.nextLine().strip();
+                        if(ans.equalsIgnoreCase("y")){
+                            while(!registerUser()){
+                                registerUser();
+                            }
+                            break;
+                        }
+                    }  
+                }
+
+            }
+        }
+        catch(NoSuchElementException e){
+            System.out.println("Остановка клиента");
+            System.exit(0);
+        }
+        catch(Exception e){
+            System.out.println("Ошибка авторизации: " + e.getMessage());
+        }
+    }
+
+    public boolean registerUser(){
+        try{
+            var username = "";
+            var password = "";
+            System.out.println("Введите логин: ");
+            username = scanner.nextLine();
+            System.out.println("Введите пароль: ");
+            password = scanner.nextLine();
+
+            user = new User(username, PasswordHasher.getHash(password));
+            var userAuthenticationRequest = new Request(user, true);
+            SendAndReceive(userAuthenticationRequest);
+            printResponse(response);
+            return response.isSuccess();
+        }
+        catch(NoSuchElementException e){
+            System.out.println("Остановка клиента");
+            System.exit(0);
+            return false;
+        }
+        catch(Exception e){
+            System.out.println("Ошибка регистрации: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     private void ClientCommand(String command, String args){
+        if(args == null) args = "";
         request = null;
 
         if(command.equals("exit")){
@@ -109,7 +182,7 @@ public class Client {
             }
             
             if(movie != null){
-                request = new Request(command, movie);
+                request = new Request(command, movie, user);
             }
         }
         else if(command.equals("remove_by_id") || command.equals("filter_greater_than_mpaa_rating")){
@@ -117,18 +190,23 @@ public class Client {
                 System.out.println("Команде нужен аргумент");
                 return;
             }
-            request = new Request(command, args);
+            request = new Request(command, args, user);
         }
         else{
             if(command.equals("save")){
                 System.out.println("Эта команда запрещена");
                 return;
             }
-            request = new Request(command, null);
+            request = new Request(command, null, user);
         }
 
         if(request != null){
             SendAndReceive(request);
+                if(response == null){
+                    System.out.println("Ответ не получен");
+                    return;
+                }
+            printResponse(response);
         }
     }
 
@@ -140,7 +218,6 @@ public class Client {
             oos.flush();
             byte[] object = baos.toByteArray();
             
-            boolean received = false;
             for(int i = 0; i < attempts; i++){
                 try{
                     DatagramPacket sendPacket = new DatagramPacket(object, object.length, host, port);
@@ -153,26 +230,12 @@ public class Client {
                     response = (Response) ois.readObject();
 
                     if(response.getResponseId().equals(request.getRequestId())){
-                        received = true;
                         break;
                     }
                 }
                 catch(SocketTimeoutException e){
                     System.out.println("Ответ от сервера не был получен. Попытка №" + (i+1));
                 }
-            }
-
-            if(response.isSuccess() && received){
-                System.out.println(response.getMessage());
-                if(response.getCollection() != null){
-                    System.out.println(response.getCollection());
-                }
-            }
-            else if(!received){
-                System.out.println("Запрос не обработан");
-            }
-            else{
-                System.out.println("Ошибка сервера");
             }
 
         }
@@ -183,6 +246,13 @@ public class Client {
             System.out.println("Сервер не отвечает");
         }
 
+    }
+
+    private void printResponse(Response response) {
+        System.out.println(response.getMessage());
+        if(response.isSuccess() && response.getCollection() != null && !response.getCollection().isEmpty()){
+            System.out.println(response.getCollection());
+        }
     }
 
     private void executeScript(String file){

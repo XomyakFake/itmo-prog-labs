@@ -53,94 +53,6 @@ public class Movie implements Validate, Comparable<Movie>, Serializable {
         return true;
     }
 
-    /**
-     * Преобразует объет Movie в массив строк для записи в csv файл.
-     * @param movie Объект фильма
-     * @return Массив строк, представляющий поля фильма.
-     */
-    public static String[] toArray(Movie movie){
-        String[] arr = new String[9];
-
-        arr[0] = String.valueOf(movie.getId());
-        arr[1] = movie.getName();
-        arr[2] = movie.getCoordinates().toString();
-        arr[3] = movie.getCreationDate().toString();
-        arr[4] = String.valueOf(movie.getOscarsCount());
-        arr[5] = String.valueOf(movie.getGoldenPalmCount());
-
-        if (movie.getTagline() == null) {
-            arr[6] = "";
-        } else {
-            arr[6] = movie.getTagline();
-        }
-
-        arr[7] = movie.getMpaaRating().toString();
-
-        if (movie.getDirector() == null) {
-            arr[8] = "";
-        } else {
-            Person p = movie.getDirector();
-            arr[8] = p.getName() + ";" + p.getPassportID() + ";" + p.getEyeColor() + ";" + p.getHairColor() + ";" + p.getNationality();
-        }
-
-        return arr;
-    }
-
-    /**
-     * Создает объект Movie из массива строк
-     * @param list Массив строк 
-     * @return Сформированный объект Movie или null в случае ошибки
-     */
-
-    public static Movie fromArray(String[] list) {
-        Integer id;
-        String name;
-        Coordinates coordinates;
-        ZonedDateTime creationDate;
-        long oscarsCount;
-        Long goldenPalmCount;
-        String tagline;
-        MpaaRating mpaaRating;
-        Person director;
-        try {
-            try { id = Integer.parseInt(list[0]); } catch (NumberFormatException e) { id = null; }
-
-            name = list[1];
-            coordinates = new Coordinates(list[2]);
-
-            try{creationDate = ZonedDateTime.parse(list[3]);}
-            catch(Exception e) { creationDate = null; }
-
-            try{ oscarsCount = Long.parseLong(list[4]); }
-            catch(NumberFormatException e) { oscarsCount = 0; }
-
-            try{goldenPalmCount = Long.parseLong(list[5]);}
-            catch(NumberFormatException e){goldenPalmCount = null;}
-
-            if(list[6].equals("null")) tagline = null;
-            else{tagline = list[6];}
-
-            try{mpaaRating = MpaaRating.valueOf(list[7]); }
-            catch(IllegalArgumentException e) { mpaaRating = null;}
-
-            if(list.length > 8 && !list[8].isEmpty() && !list[8].equals("null")) director = new Person(list[8]);
-            else{director = null;}
-
-            Movie movie = new Movie(name, coordinates, creationDate, oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
-            movie.setId(id);
-            return movie;
-
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Создает объект Movie из массива строк без указания ID
-     * @param list Массив строк 
-     * @return Сформированный объект Movie или null в случае ошибки
-     */
-
     public static Movie fromArrayNoId(String[] list) {
         String name;
         Coordinates coordinates;
@@ -178,6 +90,7 @@ public class Movie implements Validate, Comparable<Movie>, Serializable {
             return null;
         }
     }
+
 
 
     public Integer getId() { return id; }
