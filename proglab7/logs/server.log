@@ -128,3 +128,4 @@ java.util.NoSuchElementException: null
 03:47:23 [main] INFO  r.itmo.server.modules.CommandInvoker [3f46ad4d-69af-44d0-91f0-b673376538c4] - Выполнение команды show
 03:47:23 [main] INFO  ru.itmo.server.modules.Server [3f46ad4d-69af-44d0-91f0-b673376538c4] - Комманда show выполнена
 03:47:23 [main] INFO  ru.itmo.server.modules.Server [3f46ad4d-69af-44d0-91f0-b673376538c4] - Ответ отправлен клиенту /127.0.0.1:60776
+18:37:22 [main] ERROR r.i.server.modules.DatabaseManager [] - Ошибка подключения к базе данных: The connection attempt failed.

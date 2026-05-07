@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
@@ -41,19 +42,23 @@ public class DatabaseManager {
             logger.error("Переменная окружения DB_USER не задана");
             throw new IllegalStateException("Переменная окружения DB_USER не задана");
         }
-        if (db_password == null || db_password.isEmpty()) {
+        if (db_password == null) {
             logger.error("Переменная окружения DB_PASSWORD не задана");
             throw new IllegalStateException("Переменная окружения DB_PASSWORD не задана");
         }
-
     }
+
     public void establishConnection(){
         try{
+            Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(db_url, db_user, db_password);
         }
         catch (SQLException e){
             logger.error("Ошибка подключения к базе данных: {}", e.getMessage());
             throw new IllegalStateException("Ошибка подключения к базе данных");
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -77,14 +82,13 @@ public class DatabaseManager {
         var username = user.getUsername();
         var hashedPassword = user.getPassword();
 
-        String query = "SELECT hashedPassword FROM users WHERE username = ?";
+        String query = "SELECT hashed_password FROM users WHERE username = ?";
         try (PreparedStatement p = connection.prepareStatement(query)){
-
             p.setString(1, username);
             ResultSet res = p.executeQuery();
 
             if (res.next()){
-                String storedHashedPassword = res.getString("hashedPassword");
+                String storedHashedPassword = res.getString("hashed_password");
                 return storedHashedPassword.equals(hashedPassword);
             }
         } 
@@ -99,50 +103,59 @@ public class DatabaseManager {
         var username = user.getUsername();
         var hashedPassword = user.getPassword();
 
-        String query = "INSERT INTO users (username, hashedPassword) VALUES (?, ?)";
+        String query = "INSERT INTO users (username, hashed_password) VALUES (?, ?)";
 
         try (PreparedStatement p = connection.prepareStatement(query)){
-
             p.setString(1, username);
             p.setString(2, hashedPassword);
             p.executeUpdate();
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
 
     public void readCollection(CollectionManager cm) {
         String query = "SELECT * FROM movies";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
                 double x = rs.getDouble("x");
                 int y = rs.getInt("y");
-                ZonedDateTime creationDate = rs.getTimestamp("creationDate").toInstant().atZone(ZoneId.systemDefault());
-                long oscarsCount = rs.getLong("oscarsCount");
-                long goldenPalmCount = rs.getLong("goldenPalmCount");
+
+                ZonedDateTime creationDate = rs.getTimestamp("creation_date")
+                        .toInstant().atZone(ZoneId.systemDefault());
+
+                long oscarsCount = rs.getLong("oscars_count");
+                long goldenPalmCount = rs.getLong("golden_palm_count");
+
                 String tagline = rs.getString("tagline");
-                MpaaRating mpaaRating = MpaaRating.valueOf(rs.getString("mpaarating"));
+                MpaaRating mpaaRating = MpaaRating.valueOf(rs.getString("mpaa_rating"));
 
                 Person director = null;
-                if (rs.getString("directorName") != null) {
-                    String directorName = rs.getString("directorName");
-                    String passportId = rs.getString("directorPassportId");
-                    Color eyeColor = rs.getString("directorEyecolor") != null ? 
-                        Color.valueOf(rs.getString("directorEyecolor")) : null;
-                    Color hairColor = rs.getString("directorHaircolor") != null ? 
-                        Color.valueOf(rs.getString("directorHaircolor")) : null;
-                    Country nationality = rs.getString("directorNationality") != null ? 
-                        Country.valueOf(rs.getString("directorNationality")) : null;
+
+                if (rs.getString("director_name") != null) {
+                    String directorName = rs.getString("director_name");
+                    String passportId = rs.getString("director_passport_id");
+
+                    Color eyeColor = rs.getString("director_eye_color") != null ? 
+                        Color.valueOf(rs.getString("director_eye_color")) : null;
+
+                    Color hairColor = rs.getString("director_hair_color") != null ? 
+                        Color.valueOf(rs.getString("director_hair_color")) : null;
+
+                    Country nationality = rs.getString("director_nationality") != null ? 
+                        Country.valueOf(rs.getString("director_nationality")) : null;
+
                     director = new Person(directorName, passportId, eyeColor, hairColor, nationality);
                 }
 
                 Coordinates coordinates = new Coordinates(x, y);
-                Movie movie = new Movie(name, coordinates, creationDate, oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
+                Movie movie = new Movie(name, coordinates, creationDate,
+                        oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
+
                 movie.setId(id);
 
                 try {
@@ -158,9 +171,10 @@ public class DatabaseManager {
     }
 
     public int addMovie(Movie movie, String owner){
-         String query = "INSERT INTO movies (name, x, y, creationDate, oscarsCount, goldenPalmCount, tagline, mpaarating, directorName, directorPassportId, directorEyecolor, directorHaircolor, directorNationality, owner)" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS mpaarating), ?, ?, CAST(? AS color), CAST(? AS color), CAST(? AS country), ?)";
-        try(PreparedStatement p = connection.prepareStatement(query)){
+        String query = "INSERT INTO movies (name, x, y, creation_date, oscars_count, golden_palm_count, tagline, mpaa_rating, director_name, director_passport_id, director_eye_color, director_hair_color, director_nationality, owner)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS mpaa_rating), ?, ?, CAST(? AS color), CAST(? AS color), CAST(? AS country), ?)";
+
+        try(PreparedStatement p = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
             p.setString(1, movie.getName());
             p.setDouble(2, movie.getCoordinates().getX());
             p.setInt(3, movie.getCoordinates().getY());
@@ -185,6 +199,8 @@ public class DatabaseManager {
                 p.setNull(13, Types.VARCHAR);
             }
 
+            p.setString(14, owner);
+
             p.executeUpdate();
 
             ResultSet keys = p.getGeneratedKeys();
@@ -194,7 +210,7 @@ public class DatabaseManager {
             return -1;
         }
         catch(SQLException e){
-            logger.error("Ошибка добавления объекта в БД");
+            logger.error("Ошибка добавления объекта в БД: {}", e.getMessage());
             return -1;
         }
     }

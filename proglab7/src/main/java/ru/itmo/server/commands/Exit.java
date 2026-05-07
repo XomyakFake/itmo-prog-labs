@@ -2,7 +2,6 @@ package ru.itmo.server.commands;
 
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
-import ru.itmo.server.modules.CollectionManager;
 
 /**
  * Команда 'exit'. Завершает выполнение программы
@@ -12,7 +11,7 @@ public class Exit implements Command {
 
     public Exit(){
     }
-    
+
     @Override 
     public String getName(){
         return "exit";
