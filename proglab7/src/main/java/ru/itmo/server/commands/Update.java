@@ -5,6 +5,7 @@ import ru.itmo.common.models.*;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
+import ru.itmo.server.modules.DatabaseManager;
 
 /**
  * Команда 'update'. Обновляет элемент коллекции по его id
@@ -12,9 +13,11 @@ import ru.itmo.server.modules.CollectionManager;
  */
 public class Update implements Command {
     private final CollectionManager cm;
+    private final DatabaseManager dm;
 
-    public Update(CollectionManager cm){
+    public Update(CollectionManager cm, DatabaseManager dm){
         this.cm = cm;
+        this.dm = dm;
     }
 
     @Override 
@@ -37,7 +40,6 @@ public class Update implements Command {
     @Override
     public Response execute(Request request){
         try {
-            // Достаем фильм
             Movie NewMovie = (Movie) request.getCommandArg();
             Integer target = NewMovie.getId(); 
 
@@ -50,6 +52,7 @@ public class Update implements Command {
                 return new Response(false, "Фильм с id=" + target + " не существует.", null);
             }
             cm.addMovie(NewMovie); 
+            dm.update(NewMovie, request.getUser().getUsername());
 
             return new Response(true, "Фильм с id=" + target + " обновлен.", null);
 

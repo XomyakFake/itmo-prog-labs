@@ -3,7 +3,8 @@ CREATE TYPE color AS ENUM ('GREEN', 'RED', 'BLUE', 'YELLOW', 'WHITE', 'BLACK', '
 CREATE TYPE country AS ENUM ('RUSSIA', 'CHINA', 'THAILAND', 'SOUTH_KOREA', 'JAPAN');
 
 CREATE TABLE IF NOT EXISTS users(
-    username TEXT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    username TEXT,
     hashed_password TEXT NOT NULL
 );
 
@@ -22,5 +23,5 @@ CREATE TABLE IF NOT EXISTS movies(
     director_eye_color color,
     director_hair_color color,
     director_nationality country,
-    owner TEXT REFERENCES users(username)
+    owner_id TEXT REFERENCES users(id)
 );

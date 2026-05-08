@@ -172,7 +172,7 @@ public class DatabaseManager {
 
     public int addMovie(Movie movie, String owner){
         String query = "INSERT INTO movies (name, x, y, creation_date, oscars_count, golden_palm_count, tagline, mpaa_rating, director_name, director_passport_id, director_eye_color, director_hair_color, director_nationality, owner)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS mpaa_rating), ?, ?, CAST(? AS color), CAST(? AS color), CAST(? AS country), ?)";
+                " VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS mpaa_rating), ?, ?, CAST(? AS color), CAST(? AS color), CAST(? AS country), (SELECT id FROM users WHERE username = ?))";
 
         try(PreparedStatement p = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
             p.setString(1, movie.getName());
@@ -215,7 +215,72 @@ public class DatabaseManager {
         }
     }
 
-    public void writeCollection(){
+    public boolean removeById(int id, String owner){
+        String query = "DELETE FROM movies WHERE id = ? AND owner_id IN (SELECT id FROM users WHERE username = ?)";
+        try (PreparedStatement p = connection.prepareStatement(query)){
+            p.setLong(1, id);
+            p.setString(2, owner);
+            p.executeUpdate();
+            return true;
 
+        } catch (SQLException e) {
+            logger.error("Ошибка удаления объекта в БД по id: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean clear(String owner){
+        String query = "DELETE FROM movies WHERE owner owner_id IN (SELECT id FROM users WHERE username = ?)";
+
+        try (PreparedStatement p = connection.prepareStatement(query)){
+            p.setString(1, owner);
+            p.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            logger.error("Ошибка очистки объектов пользователя: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean update(Movie movie, String owner){
+        String query = "UPDATE movies SET name = ?, x = ?, y = ?, creation_date = ?, oscars_count = ?, golden_palm_count = ?, tagline = ?, mpaa_rating = ?, director_name = ?, director_passport_id = ?, director_eye_color = ?, director_hair_color = ?, director_nationality = ? WHERE (id = ? AND owner_id IN (SELECT id FROM users WHERE username = ?))";
+        try (PreparedStatement p = connection.prepareStatement(query)){
+            p.setString(1, movie.getName());
+            p.setDouble(2, movie.getCoordinates().getX());
+            p.setInt(3, movie.getCoordinates().getY());
+            p.setTimestamp(4, Timestamp.from(movie.getCreationDate().toInstant()));
+            p.setLong(5, movie.getOscarsCount());
+            p.setLong(6, movie.getGoldenPalmCount());
+            p.setString(7, movie.getTagline());
+            p.setString(8, movie.getMpaaRating().name());
+            p.setString(9, movie.getDirector() != null ? movie.getDirector().getName() : null);
+            p.setString(10, movie.getDirector() != null ? movie.getDirector().getPassportID() : null);
+            p.setString(11, movie.getDirector() != null ? movie.getDirector().getEyeColor() != null ? movie.getDirector().getEyeColor().name() : null : null);
+            p.setString(12, movie.getDirector() != null ? movie.getDirector().getHairColor() != null ? movie.getDirector().getHairColor().name() : null : null);
+            p.setString(13, movie.getDirector() != null ? movie.getDirector().getNationality() != null ? movie.getDirector().getNationality().name() : null : null);
+            p.setInt(14, movie.getId());
+            p.setString(15, owner);
+
+            p.executeUpdate();
+            return true;
+        }
+        catch(SQLException e){
+            logger.error("Ошибка обновления объекта в БД: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean removeGreater(Movie movie, String owner){
+        String query = "DELETE FROM movies WHERE oscars_count > ? AND owner_id IN (SELECT id FROM users WHERE username = ?)";
+        try (PreparedStatement p = connection.prepareStatement(query)){
+            p.setLong(1, movie.getOscarsCount());
+            p.setString(2, owner);
+            p.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            logger.error("Ошибка удаления объектов в БД меньше значения oscars_count: {}", e.getMessage());
+            return false;
+        }
     }
 }

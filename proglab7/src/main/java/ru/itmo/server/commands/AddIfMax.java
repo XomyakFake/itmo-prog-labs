@@ -7,6 +7,7 @@ import ru.itmo.common.models.*;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
+import ru.itmo.server.modules.DatabaseManager;
 
 /**
  * Команда 'add_if_max'. Добавляет новый элемент в коллекцию, 
@@ -16,9 +17,11 @@ import ru.itmo.server.modules.CollectionManager;
 
 public class AddIfMax implements Command {
     private final CollectionManager cm;
+    private final DatabaseManager dm;
 
-    public AddIfMax(CollectionManager cm){
+    public AddIfMax(CollectionManager cm, DatabaseManager dm){
         this.cm = cm;
+        this.dm = dm;
     }
 
     @Override 
@@ -42,8 +45,9 @@ public class AddIfMax implements Command {
     public Response execute(Request request){
         try{
             Movie movie = (Movie) request.getCommandArg();
-            movie.setId(cm.generateId());
             if(Collections.max(cm.getCollection()).compareTo(movie) < 0){
+                int id = dm.addMovie(movie, request.getUser().getUsername());
+                movie.setId(id);
                 cm.addMovie(movie);
                 return new Response(true, "Фильм добавлен", null);}
             else{

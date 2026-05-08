@@ -2,17 +2,17 @@ package ru.itmo.server.commands;
 
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
-import ru.itmo.server.modules.CollectionManager;
+import ru.itmo.server.modules.DatabaseManager;
 
 /**
  * Команда 'clear'. Очищает коллекцию
  * @author XomyakFake
  */
 public class Clear implements Command {
-    private final CollectionManager collectionmanager;
+    private final DatabaseManager dm;
 
-    public Clear(CollectionManager collectionmanager){
-        this.collectionmanager = collectionmanager;
+    public Clear(DatabaseManager dm){
+        this.dm = dm;
     }
 
     @Override 
@@ -34,7 +34,7 @@ public class Clear implements Command {
      */
     @Override
     public Response execute(Request request){
-        collectionmanager.clearCollection();
+        dm.clear(request.getUser().getUsername());
         return new Response(true, "Коллекция очищена", null);
     }
     

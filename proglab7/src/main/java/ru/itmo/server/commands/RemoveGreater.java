@@ -4,6 +4,7 @@ import ru.itmo.common.models.*;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
+import ru.itmo.server.modules.DatabaseManager;
 
 /**
  * Команда 'remove_greater'. Удаляет элементы из коллекции превышающие заданный
@@ -11,9 +12,11 @@ import ru.itmo.server.modules.CollectionManager;
  */
 public class RemoveGreater implements Command {
     private final CollectionManager cm;
+    private final DatabaseManager dm;
 
-    public RemoveGreater(CollectionManager cm){
+    public RemoveGreater(CollectionManager cm, DatabaseManager dm){
         this.cm = cm;
+        this.dm = dm;
     }
 
     @Override 
@@ -40,6 +43,7 @@ public class RemoveGreater implements Command {
 
             int bef = cm.getCollection().size();
             cm.getCollection().removeIf(m -> m.compareTo(target) > 0);
+            dm.removeGreater(target, request.getUser().getUsername());
 
             int aft = cm.getCollection().size();
 
