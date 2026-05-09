@@ -1,5 +1,6 @@
 package ru.itmo.server.commands;
 
+import ru.itmo.common.models.Movie;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
@@ -41,14 +42,19 @@ public class RemoveById implements Command {
             String arg = (String) request.getCommandArg();
             int id = Integer.parseInt(arg.strip());
 
-            boolean removed = cm.getCollection().removeIf(movie -> movie.getId().equals(id));
+            Movie found = cm.getCollection().stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
 
-            if (removed) {
-                dm.removeById(id, request.getUser().getUsername());
-                return new Response(true, "Фильм с id=" + id + " удален", null);
-            } else {
-                return new Response(false, "Фильм с таким id не найден", null);
+            if (found == null) {
+                return new Response(false, "Фильм не найден", null);
             }
+
+            boolean removed = dm.removeById(id, request.getUser().getUsername());
+            if (!removed) {
+                return new Response(false, "Нет прав на удаление", null);
+            }
+
+            cm.getCollection().removeIf(m -> m.getId().equals(id));
+            return new Response(true, "Фильм с id=" + id + " удален", null);
 
         } catch (NumberFormatException | NullPointerException e) {
             return new Response(false, "Некорректный id. Введите число", null);

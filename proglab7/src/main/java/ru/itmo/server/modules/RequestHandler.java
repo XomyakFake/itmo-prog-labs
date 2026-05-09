@@ -61,6 +61,14 @@ public class RequestHandler {
             MDC.put("requestId", requestId);
             logger.info("Команда получена {} от {}", request.getCommandName(), clientAddress);
 
+            if (!dm.checkUserExistanse(request.getUser().getUsername()) || !dm.checkUserPassword(request.getUser())) {
+                Response response = new Response(false, "Не авторизован", null);
+                response.setResponseId(request.getRequestId());
+                byte[] responseData = Serializer.serialize(response);
+                storage.put(requestId, responseData);
+                return responseData;
+            }
+
             Response response = commandInvoker.execute(request);
             response.setResponseId(request.getRequestId());
             logger.info("Команда {} выполнена", request.getCommandName());

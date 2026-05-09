@@ -40,19 +40,27 @@ public class Update implements Command {
     @Override
     public Response execute(Request request){
         try {
-            Movie NewMovie = (Movie) request.getCommandArg();
-            Integer target = NewMovie.getId(); 
+            Movie newMovie = (Movie) request.getCommandArg();
+            Integer target = newMovie.getId(); 
 
             if (target == null) {
                 return new Response(false, "Ошибка. Пустой ID.", null);
             }
 
-            boolean removed = cm.getCollection().removeIf(m -> m.getId().equals(target));
-            if (!removed) {
-                return new Response(false, "Фильм с id=" + target + " не существует.", null);
+            Movie found = cm.getCollection().stream().filter(m -> m.getId().equals(target)).findFirst().orElse(null);
+
+            if (found == null) {
+                return new Response(false, "Фильм не найден", null);
             }
-            cm.addMovie(NewMovie); 
-            dm.update(NewMovie, request.getUser().getUsername());
+
+            boolean updated = dm.update(newMovie, request.getUser().getUsername());
+            if (!updated) {
+                return new Response(false, "Нет прав или фильм не найден", null);
+            }
+
+            cm.getCollection().removeIf(m -> m.getId().equals(target));
+            newMovie.setOwner(found.getOwner());
+            cm.addMovie(newMovie);
 
             return new Response(true, "Фильм с id=" + target + " обновлен.", null);
 

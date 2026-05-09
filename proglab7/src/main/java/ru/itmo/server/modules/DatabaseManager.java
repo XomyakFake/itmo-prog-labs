@@ -125,8 +125,7 @@ public class DatabaseManager {
                 double x = rs.getDouble("x");
                 int y = rs.getInt("y");
 
-                ZonedDateTime creationDate = rs.getTimestamp("creation_date")
-                        .toInstant().atZone(ZoneId.systemDefault());
+                ZonedDateTime creationDate = rs.getTimestamp("creation_date").toInstant().atZone(ZoneId.systemDefault());
 
                 long oscarsCount = rs.getLong("oscars_count");
                 long goldenPalmCount = rs.getLong("golden_palm_count");
@@ -157,6 +156,7 @@ public class DatabaseManager {
                         oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
 
                 movie.setId(id);
+                movie.setOwner(rs.getString("owner_id"));
 
                 try {
                     cm.addMovie(movie);
@@ -171,8 +171,8 @@ public class DatabaseManager {
     }
 
     public int addMovie(Movie movie, String owner){
-        String query = "INSERT INTO movies (name, x, y, creation_date, oscars_count, golden_palm_count, tagline, mpaa_rating, director_name, director_passport_id, director_eye_color, director_hair_color, director_nationality, owner)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS mpaa_rating), ?, ?, CAST(? AS color), CAST(? AS color), CAST(? AS country), (SELECT id FROM users WHERE username = ?))";
+        String query = "INSERT INTO movies (name, x, y, creation_date, oscars_count, golden_palm_count, tagline, mpaa_rating, director_name, director_passport_id, director_eye_color, director_hair_color, director_nationality, owner_id)" +
+        " VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS mpaa_rating), ?, ?, CAST(? AS color), CAST(? AS color), CAST(? AS country), (SELECT id FROM users WHERE username = ?))";
 
         try(PreparedStatement p = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
             p.setString(1, movie.getName());
@@ -216,7 +216,7 @@ public class DatabaseManager {
     }
 
     public boolean removeById(int id, String owner){
-        String query = "DELETE FROM movies WHERE id = ? AND owner_id IN (SELECT id FROM users WHERE username = ?)";
+        String query = "DELETE FROM movies WHERE id = ? AND owner_id = (SELECT id FROM users WHERE username = ?)";
         try (PreparedStatement p = connection.prepareStatement(query)){
             p.setLong(1, id);
             p.setString(2, owner);
@@ -230,8 +230,7 @@ public class DatabaseManager {
     }
 
     public boolean clear(String owner){
-        String query = "DELETE FROM movies WHERE owner owner_id IN (SELECT id FROM users WHERE username = ?)";
-
+        String query = "DELETE FROM movies WHERE owner_id = (SELECT id FROM users WHERE username = ?)";
         try (PreparedStatement p = connection.prepareStatement(query)){
             p.setString(1, owner);
             p.executeUpdate();
@@ -244,7 +243,7 @@ public class DatabaseManager {
     }
 
     public boolean update(Movie movie, String owner){
-        String query = "UPDATE movies SET name = ?, x = ?, y = ?, creation_date = ?, oscars_count = ?, golden_palm_count = ?, tagline = ?, mpaa_rating = ?, director_name = ?, director_passport_id = ?, director_eye_color = ?, director_hair_color = ?, director_nationality = ? WHERE (id = ? AND owner_id IN (SELECT id FROM users WHERE username = ?))";
+        String query = "UPDATE movies SET name = ?, x = ?, y = ?, creation_date = ?, oscars_count = ?, golden_palm_count = ?, tagline = ?, mpaa_rating = CAST(? AS mpaa_rating), director_name = ?, director_passport_id = ?, director_eye_color = CAST(? AS color), director_hair_color = CAST(? AS color), director_nationality = CAST(? AS country) WHERE id = ? AND owner_id = (SELECT id FROM users WHERE username = ?)";
         try (PreparedStatement p = connection.prepareStatement(query)){
             p.setString(1, movie.getName());
             p.setDouble(2, movie.getCoordinates().getX());
@@ -272,7 +271,7 @@ public class DatabaseManager {
     }
 
     public boolean removeGreater(Movie movie, String owner){
-        String query = "DELETE FROM movies WHERE oscars_count > ? AND owner_id IN (SELECT id FROM users WHERE username = ?)";
+        String query = "DELETE FROM movies WHERE oscars_count > ? AND owner_id = (SELECT id FROM users WHERE username = ?)";
         try (PreparedStatement p = connection.prepareStatement(query)){
             p.setLong(1, movie.getOscarsCount());
             p.setString(2, owner);

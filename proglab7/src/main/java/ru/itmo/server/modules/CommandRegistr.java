@@ -8,7 +8,7 @@ public class CommandRegistr{
         invoker.register(new Help(invoker));
         invoker.register(new Info(collectionManager));
         invoker.register(new Show(collectionManager));
-        invoker.register(new Clear(dm));
+        invoker.register(new Clear(dm, collectionManager));
         invoker.register(new Exit());
         invoker.register(new Add(collectionManager, dm));
         invoker.register(new RemoveById(collectionManager, dm));

@@ -23,5 +23,5 @@ CREATE TABLE IF NOT EXISTS movies(
     director_eye_color color,
     director_hair_color color,
     director_nationality country,
-    owner_id TEXT REFERENCES users(id)
+    owner_id INT REFERENCES users(id)
 );

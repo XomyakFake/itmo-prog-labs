@@ -10,6 +10,8 @@ import java.nio.channels.Selector;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ public class Server {
     private Logger logger = LoggerFactory.getLogger(Server.class);;
     private static final int PACKET_SIZE = 60000;
     private static final int DATA_SIZE = PACKET_SIZE - 1; 
+    private final ExecutorService readPool = Executors.newCachedThreadPool();
 
     public Server(InetSocketAddress address){
         this.address = address;
@@ -91,9 +94,26 @@ public class Server {
                             byte[] data = new byte[buffer.limit()];
                             buffer.get(data);
 
-                            byte[] responseData = requestHandler.handle(data, clientAddress.toString());
-                            sendChunks(channel, responseData, clientAddress);
-
+                            byte[] finalData = data; 
+                            SocketAddress finalClientAddress = clientAddress;
+                            readPool.execute(() -> {
+                                    new Thread(() -> {
+                                        byte[] responseData = requestHandler.handle(finalData, finalClientAddress.toString());
+                                            if (responseData == null) {
+                                                logger.error("Ответ пустой, не отправляем");
+                                                return;
+                                            }
+                                        
+                                        new Thread(() -> {
+                                            try {
+                                                sendChunks(channel, responseData, finalClientAddress);
+                                            } catch (IOException e) {
+                                                logger.error("Ошибка отправки ответа", e);
+                                            }
+                                        }).start();
+                                        
+                                    }).start();
+                                });
                         }
                     }
                 }

@@ -2,8 +2,7 @@ package ru.itmo.server.modules;
 
 import ru.itmo.common.exceptions.ValidateException;
 import ru.itmo.common.models.Movie;
-
-import java.util.HashSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,7 @@ import java.time.ZonedDateTime;
  * @author XomyakFake
  */
 public class CollectionManager {
-    private final HashSet<Movie> collection = new HashSet<>();
+    private final CopyOnWriteArrayList<Movie> collection = new CopyOnWriteArrayList<>();
     private final ZonedDateTime initializationTime = ZonedDateTime.now();
     private Logger logger = LoggerFactory.getLogger(CollectionManager.class);
 
@@ -62,7 +61,7 @@ public class CollectionManager {
      * Возвращает коллекцию
      * @return Коллекция
      */
-    public HashSet<Movie> getCollection(){
+    public CopyOnWriteArrayList<Movie> getCollection(){
         return collection;
     }
 

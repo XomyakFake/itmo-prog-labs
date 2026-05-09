@@ -20,6 +20,8 @@ public class Movie implements Validate, Comparable<Movie>, Serializable {
     private String tagline; //Поле может быть null
     private MpaaRating mpaaRating; //Поле не может быть null
     private Person director; //Поле может быть null
+    private String owner;
+
 
     public Movie(String name, Coordinates coordinates, ZonedDateTime creationDate, long oscarsCount, Long goldenPalmCount, String tagline, MpaaRating mpaaRating, Person director) {
         this.name = name;
@@ -102,6 +104,10 @@ public class Movie implements Validate, Comparable<Movie>, Serializable {
     public String getTagline() { return tagline; }
     public MpaaRating getMpaaRating() { return mpaaRating; }
     public Person getDirector() { return director; }
+
+    public String getOwner() { return owner; }
+    public void setOwner(String owner) { this.owner = owner; }
+
     
     public void setId(Integer id){
         this.id = id;
