@@ -1,7 +1,7 @@
 package ru.itmo.server.commands;
 
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import ru.itmo.common.models.Movie;
@@ -53,7 +53,7 @@ public class FilterGreaterThanMpaaRating implements Command {
         catch(IllegalArgumentException e){
             return new Response(false, "Некоректный рейтинг. Доступны только: " + MpaaRating.names(), null);
         }
-        HashSet<Movie> collection = cm.getCollection();
+        CopyOnWriteArrayList<Movie> collection = cm.getCollection();
         String movies = collection.stream().filter(movie -> movie.getMpaaRating().compareTo(target) > 0).sorted(Comparator.comparing(Movie::getName)).map(Movie::toString).collect(Collectors.joining("\n"));
         if(movies.isEmpty()){
             return new Response(true, "Фильмы не найдены", movies);

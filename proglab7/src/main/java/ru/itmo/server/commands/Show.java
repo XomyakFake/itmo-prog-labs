@@ -1,7 +1,7 @@
 package ru.itmo.server.commands;
 
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import ru.itmo.common.models.Movie;
@@ -38,7 +38,7 @@ public class Show implements Command {
      */
     @Override
     public Response execute(Request request){
-        HashSet<Movie> collection = collectionmanager.getCollection();
+        CopyOnWriteArrayList<Movie> collection = collectionmanager.getCollection();
         if(collectionmanager.getCollection().isEmpty()){
             return new Response(true, "Коллекция пуста", null);
         }
