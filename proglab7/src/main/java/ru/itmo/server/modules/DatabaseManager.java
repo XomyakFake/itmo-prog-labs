@@ -115,7 +115,7 @@ public class DatabaseManager {
     }
 
     public void readCollection(CollectionManager cm) {
-        String query = "SELECT * FROM movies";
+        String query = "SELECT movies.*, users.username AS owner_username FROM movies LEFT JOIN users ON movies.owner_id = users.id";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
