@@ -167,7 +167,7 @@ public class Client {
             executeScript(args);
             return;
         }
-        else if(command.equals("add") || command.equals("add_if_max")  || command.equals("remove_greater") || command.equals("update")){
+        else if(command.equals("add") || command.equals("add_if_max")  || command.equals("remove_greater")){
             Movie movie = null; 
             
             if(!args.isEmpty()){
@@ -185,6 +185,39 @@ public class Client {
                 request = new Request(command, movie, user);
             }
         }
+        else if(command.equals("update")){
+            Movie movie = null; 
+
+            if(args.isEmpty()){
+                System.out.println("Команде нужен аргумент (id)");
+                return;
+            }
+            String[] parts = args.split(",", 2);
+            int id;
+            try {
+                id = Integer.parseInt(parts[0].strip());
+            } catch (NumberFormatException e) {
+                System.out.println("Некорректный id");
+                return;
+            }
+
+            if(parts.length > 1){
+                movie = Movie.fromArrayNoId(parts[1].split(",", -1));
+                if(movie == null || !movie.validate()){
+                    System.out.println("Ошибка парсинга");
+                    return;
+                }
+            }
+            else{
+                movie = Ask.askMovie(scanner);
+            }
+            movie.setId(id);
+
+            if(movie != null){
+                request = new Request(command, movie, user);
+            }
+        }
+
         else if(command.equals("remove_by_id") || command.equals("filter_greater_than_mpaa_rating")){
             if(args.isEmpty()){
                 System.out.println("Команде нужен аргумент");

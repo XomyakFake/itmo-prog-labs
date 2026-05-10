@@ -156,7 +156,7 @@ public class DatabaseManager {
                         oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
 
                 movie.setId(id);
-                movie.setOwner(rs.getString("owner_id"));
+                movie.setOwner(rs.getString("owner_username"));
 
                 try {
                     cm.addMovie(movie);
@@ -220,9 +220,8 @@ public class DatabaseManager {
         try (PreparedStatement p = connection.prepareStatement(query)){
             p.setLong(1, id);
             p.setString(2, owner);
-            p.executeUpdate();
-            return true;
-
+            int rows = p.executeUpdate();
+            return rows > 0;
         } catch (SQLException e) {
             logger.error("Ошибка удаления объекта в БД по id: {}", e.getMessage());
             return false;
@@ -261,8 +260,8 @@ public class DatabaseManager {
             p.setInt(14, movie.getId());
             p.setString(15, owner);
 
-            p.executeUpdate();
-            return true;
+            int rows = p.executeUpdate();
+            return rows > 0;
         }
         catch(SQLException e){
             logger.error("Ошибка обновления объекта в БД: {}", e.getMessage());

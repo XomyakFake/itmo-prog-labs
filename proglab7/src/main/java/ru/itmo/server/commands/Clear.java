@@ -38,7 +38,7 @@ public class Clear implements Command {
     @Override
     public Response execute(Request request){
         dm.clear(request.getUser().getUsername());
-        cm.getCollection().removeIf(m -> m.getOwner().equals(request.getUser().getUsername()));
+        cm.getCollection().removeIf(m -> m.getOwner() != null && m.getOwner().equals(request.getUser().getUsername()));
         return new Response(true, "Коллекция очищена", null);
     }
     

@@ -146,7 +146,8 @@ public class Ask {
             System.out.print("MpaaRating (" + MpaaRating.names() + "): ");
             var line = scanner.nextLine().strip();
             if(line.isEmpty()){
-                return null;
+                System.out.println("MpaaRating обязателен");
+                continue;
             }
             try{
                 int num = Integer.parseInt(line);

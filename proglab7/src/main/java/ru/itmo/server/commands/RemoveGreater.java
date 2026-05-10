@@ -40,10 +40,10 @@ public class RemoveGreater implements Command {
     public Response execute(Request request){
         try {
             Movie target = (Movie) request.getCommandArg();
+            dm.removeGreater(target, request.getUser().getUsername());
 
             int bef = cm.getCollection().size();
-            cm.getCollection().removeIf(m -> m.compareTo(target) > 0);
-            dm.removeGreater(target, request.getUser().getUsername());
+            cm.getCollection().removeIf(m -> m.compareTo(target) > 0 && m.getOwner().equals(request.getUser().getUsername()));
 
             int aft = cm.getCollection().size();
 
