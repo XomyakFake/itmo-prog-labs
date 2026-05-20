@@ -14,6 +14,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -34,6 +35,8 @@ public class Client {
     private static final Set<String> executingScripts = new HashSet<>();
     private int attempts = 2;
     private User user;
+    private String jwtToken = null;
+    private int commandCount = 0;
 
     public Client(InetAddress host, int port){
         this.host = host;
@@ -101,6 +104,8 @@ public class Client {
                 SendAndReceive(userAuthenticationRequest);
                 if(response.isSuccess()){
                     printResponse(response);
+                    this.jwtToken = response.getToken(); 
+                    this.commandCount = 0; 
                     break;
                 }
                 else{
@@ -162,6 +167,20 @@ public class Client {
         if(command.equals("exit")){
             System.out.println("Работа клиентского приложения завершена");
             System.exit(0);
+        }
+        if (!command.equals("execute_script")) {
+            commandCount++;
+            if (commandCount > 10) {
+                System.out.println("\n[Безопасность] Превышен лимит в 10 команд.");
+                if (askCaptchaAndVerifyPassword()) {
+                    System.out.println("Проверка пройдена!\n");
+                    commandCount = 1; 
+                } else {
+                    System.out.println("Ошибка проверки. Требуется полный перезаход.");
+                    authenticateUser();
+                    return;
+                }
+            }
         }
         else if (command.equals("execute_script")){
             executeScript(args);
@@ -234,13 +253,21 @@ public class Client {
         }
 
         if(request != null){
-            SendAndReceive(request);
+                request.setToken(this.jwtToken); 
+                SendAndReceive(request);
                 if(response == null){
                     System.out.println("Ответ не получен");
                     return;
                 }
-            printResponse(response);
-        }
+                
+                if (!response.isSuccess() && response.getMessage().contains("Сессия устарела")) {
+                    System.out.println(response.getMessage());
+                    authenticateUser();
+                    return;
+                }
+                
+                printResponse(response);
+            }
     }
 
     private void SendAndReceive(Request request){
@@ -338,5 +365,47 @@ public class Client {
         }
 
     }
+
+private boolean askCaptchaAndVerifyPassword() {
+    try {
+        int a = (int) (Math.random() * 15) + 1;
+        int b = (int) (Math.random() * 15) + 1;
+        System.out.print("Решите капчу (" + a + " + " + b + " = ?): ");
+        try {
+            int answer = Integer.parseInt(scanner.nextLine().strip());
+            if (answer != (a + b)) {
+                System.out.println("Капча введена неверно");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Ошибка ввода. Нужно ввести число.");
+            return false;
+        }
+
+        System.out.print("Введите ваш пароль для подтверждения: ");
+        String confirmPassword = scanner.nextLine();
+    
+        if (!PasswordHasher.getHash(confirmPassword).equals(user.getPassword())) {
+            System.out.println("Неверный пароль");
+            return false;
+        }
+
+        var refreshRequest = new Request(user, false);
+        SendAndReceive(refreshRequest);
+        if (response.isSuccess()) {
+            this.jwtToken = response.getToken(); 
+            return true;
+        }
+        return false;
+
+    } catch (NoSuchElementException e) {
+        System.out.println("Остановка клиента");
+        System.exit(0);
+        return false;
+    } catch (NoSuchAlgorithmException e) {
+        System.out.println("Ошибка хэширования");
+        return false;
+    }
+}
 
 }

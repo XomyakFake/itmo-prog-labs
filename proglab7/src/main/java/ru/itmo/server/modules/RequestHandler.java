@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import ru.itmo.common.network.JwtToken;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 
@@ -34,6 +35,9 @@ public class RequestHandler {
                 if(!request.isRegister()){
                     if(dm.checkUserExistanse(request.getUser().getUsername()) && dm.checkUserPassword(request.getUser())){
                         response = new Response(true, "Добро пожаловать!", null);
+
+                        String token = JwtToken.generateToken(request.getUser().getUsername());
+                        response.setToken(token);
                     }
                     else if(!dm.checkUserExistanse(request.getUser().getUsername())){
                         response = new Response(false, "Пользователя " + request.getUser().getUsername() + " не существует", null);
@@ -61,12 +65,14 @@ public class RequestHandler {
             MDC.put("requestId", requestId);
             logger.info("Команда получена {} от {}", request.getCommandName(), clientAddress);
 
-            if (!dm.checkUserExistanse(request.getUser().getUsername()) || !dm.checkUserPassword(request.getUser())) {
-                Response response = new Response(false, "Не авторизован", null);
-                response.setResponseId(request.getRequestId());
-                byte[] responseData = Serializer.serialize(response);
-                storage.put(requestId, responseData);
-                return responseData;
+            String usernameFromToken = JwtToken.validateToken(request.getToken());
+
+            if (usernameFromToken == null || !usernameFromToken.equals(request.getUser().getUsername())) {
+                        Response response = new Response(false, "Сессия устарела. Требуется повторный вход.", null);
+                        response.setResponseId(request.getRequestId());
+                        byte[] responseData = Serializer.serialize(response);
+                        storage.put(requestId, responseData);
+                        return responseData;
             }
 
             Response response = commandInvoker.execute(request);

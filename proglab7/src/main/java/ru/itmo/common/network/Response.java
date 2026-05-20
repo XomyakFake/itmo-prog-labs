@@ -8,6 +8,7 @@ public class Response implements Serializable{
     private String collection;
     private boolean success;
     private UUID responseId;
+    private String token;
 
     public Response(boolean success, String message, String collection){
         this.success = success;
@@ -30,6 +31,12 @@ public class Response implements Serializable{
 
     public void setResponseId(UUID responseId){
         this.responseId = responseId;
+    }
+    public String getToken(){
+        return token;
+    }
+    public void setToken(String token){
+        this.token = token;
     }
     
 }

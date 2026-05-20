@@ -111,7 +111,6 @@ public class Server {
                                                 logger.error("Ошибка отправки ответа", e);
                                             }
                                         }).start();
-                                        
                                     }).start();
                                 });
                         }
