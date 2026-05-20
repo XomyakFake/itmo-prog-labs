@@ -102,26 +102,27 @@ public class Client {
                 user = new User(username, PasswordHasher.getHash(password));
                 var userAuthenticationRequest = new Request(user, false);
                 SendAndReceive(userAuthenticationRequest);
-                if(response.isSuccess()){
+                
+                if(response != null && response.isSuccess()){
                     printResponse(response);
                     this.jwtToken = response.getToken(); 
                     this.commandCount = 0; 
                     break;
                 }
-                else{
+                else if(response != null){
                     printResponse(response);
                     if(response.getMessage().equals("Пользователя " + user.getUsername() + " не существует")){
                         System.out.println("Если вы хотите зарегистрироваться, нажмите 'y'");
                         var ans = scanner.nextLine().strip();
                         if(ans.equalsIgnoreCase("y")){
-                            while(!registerUser()){
-                                registerUser();
+                            boolean registered = false;
+                            while(!registered){
+                                registered = registerUser();
                             }
                             break;
                         }
                     }  
                 }
-
             }
         }
         catch(NoSuchElementException e){
@@ -145,8 +146,11 @@ public class Client {
             user = new User(username, PasswordHasher.getHash(password));
             var userAuthenticationRequest = new Request(user, true);
             SendAndReceive(userAuthenticationRequest);
-            printResponse(response);
-            return response.isSuccess();
+            if(response != null) {
+                printResponse(response);
+                return response.isSuccess();
+            }
+            return false;
         }
         catch(NoSuchElementException e){
             System.out.println("Остановка клиента");
@@ -159,7 +163,6 @@ public class Client {
         }
     }
 
-
     private void ClientCommand(String command, String args){
         if(args == null) args = "";
         request = null;
@@ -168,27 +171,27 @@ public class Client {
             System.out.println("Работа клиентского приложения завершена");
             System.exit(0);
         }
-        if (!command.equals("execute_script")) {
-            commandCount++;
-            if (commandCount > 10) {
-                System.out.println("\n[Безопасность] Превышен лимит в 10 команд.");
-                if (askCaptchaAndVerifyPassword()) {
-                    System.out.println("Проверка пройдена!\n");
-                    commandCount = 1; 
-                } else {
-                    System.out.println("Ошибка проверки. Требуется полный перезаход.");
-                    authenticateUser();
-                    return;
-                }
-            }
-        }
-        else if (command.equals("execute_script")){
+
+        if (command.equals("execute_script")){
             executeScript(args);
             return;
         }
-        else if(command.equals("add") || command.equals("add_if_max")  || command.equals("remove_greater")){
+
+        commandCount++;
+        if (commandCount > 10) {
+            System.out.println("\n[Безопасность] Превышен лимит в 10 команд.");
+            if (askCaptchaAndVerifyPassword()) {
+                System.out.println("Проверка пройдена!\n");
+                commandCount = 1; 
+            } else {
+                System.out.println("Ошибка проверки. Требуется полный перезаход.");
+                authenticateUser();
+                return;
+            }
+        }
+
+        if(command.equals("add") || command.equals("add_if_max") || command.equals("remove_greater")){
             Movie movie = null; 
-            
             if(!args.isEmpty()){
                 movie = Movie.fromArrayNoId(args.split(",", -1));
                 if(movie == null || !movie.validate()){
@@ -199,14 +202,12 @@ public class Client {
             else{
                 movie = Ask.askMovie(scanner);
             }
-            
             if(movie != null){
                 request = new Request(command, movie, user);
             }
         }
         else if(command.equals("update")){
             Movie movie = null; 
-
             if(args.isEmpty()){
                 System.out.println("Команде нужен аргумент (id)");
                 return;
@@ -236,7 +237,6 @@ public class Client {
                 request = new Request(command, movie, user);
             }
         }
-
         else if(command.equals("remove_by_id") || command.equals("filter_greater_than_mpaa_rating")){
             if(args.isEmpty()){
                 System.out.println("Команде нужен аргумент");
@@ -253,24 +253,26 @@ public class Client {
         }
 
         if(request != null){
-                request.setToken(this.jwtToken); 
-                SendAndReceive(request);
-                if(response == null){
-                    System.out.println("Ответ не получен");
-                    return;
-                }
-                
-                if (!response.isSuccess() && response.getMessage().contains("Сессия устарела")) {
-                    System.out.println(response.getMessage());
-                    authenticateUser();
-                    return;
-                }
-                
-                printResponse(response);
+            request.setToken(this.jwtToken); 
+            SendAndReceive(request);
+            
+            if(response == null){
+                System.out.println("Ответ не получен");
+                return;
             }
+            
+            if (!response.isSuccess() && response.getMessage() != null && response.getMessage().contains("Сессия устарела")) {
+                System.out.println(response.getMessage());
+                authenticateUser();
+                return;
+            }
+            
+            printResponse(response);
+        }
     }
 
     private void SendAndReceive(Request request){
+        this.response = null;
         try{
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -289,7 +291,7 @@ public class Client {
                     ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(receiveBytes, 0, receiveBytes.length));
                     response = (Response) ois.readObject();
 
-                    if(response.getResponseId().equals(request.getRequestId())){
+                    if(response != null && response.getResponseId().equals(request.getRequestId())){
                         break;
                     }
                 }
@@ -297,21 +299,18 @@ public class Client {
                     System.out.println("Ответ от сервера не был получен. Попытка №" + (i+1));
                 }
             }
-
-        }
-        catch(SocketTimeoutException e){
-            System.out.println("Ошибка. Время подключения вышло");
         }
         catch(Exception e){
             System.out.println("Сервер не отвечает");
         }
-
     }
 
     private void printResponse(Response response) {
-        System.out.println(response.getMessage());
-        if(response.isSuccess() && response.getCollection() != null && !response.getCollection().isEmpty()){
-            System.out.println(response.getCollection());
+        if (response != null && response.getMessage() != null) {
+            System.out.println(response.getMessage());
+            if(response.isSuccess() && response.getCollection() != null && !response.getCollection().isEmpty()){
+                System.out.println(response.getCollection());
+            }
         }
     }
 
@@ -363,49 +362,47 @@ public class Client {
         finally{
             executingScripts.remove(absolutePath);
         }
-
     }
 
-private boolean askCaptchaAndVerifyPassword() {
-    try {
-        int a = (int) (Math.random() * 15) + 1;
-        int b = (int) (Math.random() * 15) + 1;
-        System.out.print("Решите капчу (" + a + " + " + b + " = ?): ");
+    private boolean askCaptchaAndVerifyPassword() {
         try {
-            int answer = Integer.parseInt(scanner.nextLine().strip());
-            if (answer != (a + b)) {
-                System.out.println("Капча введена неверно");
+            int a = (int) (Math.random() * 15) + 1;
+            int b = (int) (Math.random() * 15) + 1;
+            System.out.print("Решите капчу (" + a + " + " + b + " = ?): ");
+            try {
+                int answer = Integer.parseInt(scanner.nextLine().strip());
+                if (answer != (a + b)) {
+                    System.out.println("Капча введена неверно");
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Ошибка ввода. Нужно ввести число.");
                 return false;
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка ввода. Нужно ввести число.");
+
+            System.out.print("Введите ваш пароль для подтверждения: ");
+            String confirmPassword = scanner.nextLine();
+        
+            if (!PasswordHasher.getHash(confirmPassword).equals(user.getPassword())) {
+                System.out.println("Неверный пароль");
+                return false;
+            }
+
+            var refreshRequest = new Request(user, false);
+            SendAndReceive(refreshRequest);
+            if (response != null && response.isSuccess()) {
+                this.jwtToken = response.getToken(); 
+                return true;
+            }
+            return false;
+
+        } catch (NoSuchElementException e) {
+            System.out.println("Остановка клиента");
+            System.exit(0);
+            return false;
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Ошибка хэширования");
             return false;
         }
-
-        System.out.print("Введите ваш пароль для подтверждения: ");
-        String confirmPassword = scanner.nextLine();
-    
-        if (!PasswordHasher.getHash(confirmPassword).equals(user.getPassword())) {
-            System.out.println("Неверный пароль");
-            return false;
-        }
-
-        var refreshRequest = new Request(user, false);
-        SendAndReceive(refreshRequest);
-        if (response.isSuccess()) {
-            this.jwtToken = response.getToken(); 
-            return true;
-        }
-        return false;
-
-    } catch (NoSuchElementException e) {
-        System.out.println("Остановка клиента");
-        System.exit(0);
-        return false;
-    } catch (NoSuchAlgorithmException e) {
-        System.out.println("Ошибка хэширования");
-        return false;
     }
-}
-
 }

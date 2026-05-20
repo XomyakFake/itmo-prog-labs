@@ -30,29 +30,26 @@ public class RequestHandler {
                 return storage.get(requestId);
             }
 
-            if(request.getCommandName() == null){
+            if (request.getCommandName() == null) {
                 Response response;
-                if(!request.isRegister()){
-                    if(dm.checkUserExistanse(request.getUser().getUsername()) && dm.checkUserPassword(request.getUser())){
+                if (!request.isRegister()) {
+                    if (dm.checkUserExistanse(request.getUser().getUsername()) && dm.checkUserPassword(request.getUser())) {
                         response = new Response(true, "Добро пожаловать!", null);
-
                         String token = JwtToken.generateToken(request.getUser().getUsername());
                         response.setToken(token);
-                    }
-                    else if(!dm.checkUserExistanse(request.getUser().getUsername())){
+                    } else if (!dm.checkUserExistanse(request.getUser().getUsername())) {
                         response = new Response(false, "Пользователя " + request.getUser().getUsername() + " не существует", null);
-                    }
-                    else{
+                    } else {
                         response = new Response(false, "Неверный пароль", null);
                     }
-
                 } else {
-                    if(dm.checkUserExistanse(request.getUser().getUsername())){
+                    if (dm.checkUserExistanse(request.getUser().getUsername())) {
                         response = new Response(false, "Пользователь " + request.getUser().getUsername() + " уже существует", null);
-                    }
-                    else{
+                    } else {
                         dm.addUser(request.getUser());
-                        response = new Response(true, "Пользователь зарегестрирован", null);
+                        response = new Response(true, "Пользователь зарегистрирован", null);
+                        String token = JwtToken.generateToken(request.getUser().getUsername());
+                        response.setToken(token);
                     }
                 } 
                 response.setResponseId(request.getRequestId());
@@ -61,18 +58,17 @@ public class RequestHandler {
                 return responseData;
             }
 
-
             MDC.put("requestId", requestId);
             logger.info("Команда получена {} от {}", request.getCommandName(), clientAddress);
 
             String usernameFromToken = JwtToken.validateToken(request.getToken());
 
             if (usernameFromToken == null || !usernameFromToken.equals(request.getUser().getUsername())) {
-                        Response response = new Response(false, "Сессия устарела. Требуется повторный вход.", null);
-                        response.setResponseId(request.getRequestId());
-                        byte[] responseData = Serializer.serialize(response);
-                        storage.put(requestId, responseData);
-                        return responseData;
+                Response response = new Response(false, "Сессия устарела. Требуется повторный вход.", null);
+                response.setResponseId(request.getRequestId());
+                byte[] responseData = Serializer.serialize(response);
+                storage.put(requestId, responseData);
+                return responseData;
             }
 
             Response response = commandInvoker.execute(request);
