@@ -38,6 +38,8 @@ public class Movie implements Validate, Comparable<Movie>, Serializable {
         this(name, coordinates, ZonedDateTime.now(), oscarsCount, goldenPalmCount, tagline, mpaaRating, director);
     }
 
+    public Movie() {}
+
     /**
      * Валидация полей.
      * @return true, если верно, иначе false
@@ -112,6 +114,14 @@ public class Movie implements Validate, Comparable<Movie>, Serializable {
     public void setId(Integer id){
         this.id = id;
     }
+    public void setName(String name) { this.name = name; }
+    public void setCoordinates(Coordinates coordinates) { this.coordinates = coordinates; }
+    public void setCreationDate(java.time.ZonedDateTime creationDate) { this.creationDate = creationDate; }
+    public void setOscarsCount(long oscarsCount) { this.oscarsCount = oscarsCount; }
+    public void setGoldenPalmCount(Long goldenPalmCount) { this.goldenPalmCount = goldenPalmCount; }
+    public void setTagline(String tagline) { this.tagline = tagline; }
+    public void setMpaaRating(MpaaRating mpaaRating) { this.mpaaRating = mpaaRating; }
+    public void setDirector(Person director) { this.director = director; }
 
     @Override
     public int compareTo(Movie other){

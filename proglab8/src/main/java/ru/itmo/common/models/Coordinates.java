@@ -27,6 +27,8 @@ public class Coordinates implements Validate, Serializable{
         catch (ArrayIndexOutOfBoundsException e) {}
     }
     
+    public Coordinates(){}
+    
     /**
      * Валидация полей.
      * @return true, если верно, иначе false
@@ -41,6 +43,8 @@ public class Coordinates implements Validate, Serializable{
     
     public Double getX() { return x; }
     public Integer getY() { return y; }
+    public void setX(Double x) { this.x = x; }
+    public void setY(Integer y) { this.y = y; }
 
     @Override
     public boolean equals(Object obj){

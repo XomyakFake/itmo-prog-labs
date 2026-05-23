@@ -2,6 +2,7 @@ package ru.itmo.server.commands;
 
 import ru.itmo.common.exceptions.ValidateException;
 import ru.itmo.common.models.*;
+import ru.itmo.common.network.JsonConverter;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
@@ -40,7 +41,7 @@ public class Add implements Command {
     @Override
     public Response execute(Request request){
         try{
-            Movie movie = (Movie) request.getCommandArg();
+            Movie movie = JsonConverter.getMapper().convertValue(request.getCommandArg(), Movie.class);
             int id = dm.addMovie(movie, request.getUser().getUsername());
             movie.setId(id);
             cm.addMovie(movie);

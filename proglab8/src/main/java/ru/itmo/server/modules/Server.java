@@ -18,63 +18,56 @@ import org.slf4j.Logger;
 
 public class Server {
     private InetSocketAddress address;
-    private Logger logger = LoggerFactory.getLogger(Server.class);;
+    private Logger logger = LoggerFactory.getLogger(Server.class);
     private static final int PACKET_SIZE = 60000;
-    private static final int DATA_SIZE = PACKET_SIZE - 1; 
-    private final ExecutorService readPool = Executors.newCachedThreadPool();
+    private static final int DATA_SIZE = PACKET_SIZE - 1;
+    private final ExecutorService virtualPool = Executors.newVirtualThreadPerTaskExecutor();
 
-    public Server(InetSocketAddress address){
+    public Server(InetSocketAddress address) {
         this.address = address;
     }
 
-    private void sendChunks(DatagramChannel channel, byte[] responseData, SocketAddress clientAddress) throws IOException{
-        int n = (int) Math.ceil((double) responseData.length / 60000);
-        for(int i = 0; i < n; i++){
+    private void sendChunks(DatagramChannel channel, byte[] responseData, SocketAddress clientAddress) throws IOException {
+        int n = (int) Math.ceil((double) responseData.length / DATA_SIZE);
+        for (int i = 0; i < n; i++) {
             int from = i * DATA_SIZE;
-            int to = Math.min((int)(from + DATA_SIZE), (int)(responseData.length)) ;
+            int to = Math.min(from + DATA_SIZE, responseData.length);
             byte[] chunk = Arrays.copyOfRange(responseData, from, to);
             byte[] packet = new byte[chunk.length + 1];
             System.arraycopy(chunk, 0, packet, 0, chunk.length);
-            if(i == n-1){
-                packet[packet.length-1] = 1;
-            }
-            else{
-                packet[packet.length-1] = 0;
-            }
+            packet[packet.length - 1] = (byte) (i == n - 1 ? 1 : 0);
             channel.send(ByteBuffer.wrap(packet), clientAddress);
-
         }
-
     }
 
-    public void run(){
+    public void run() {
         DatabaseManager dm = new DatabaseManager();
         dm.establishConnection();
-        CommandInvoker commandinvoker = new CommandInvoker();
-        CollectionManager collectionmanager = new CollectionManager();
-        dm.readCollection(collectionmanager);
-
-        CommandRegistr.register(commandinvoker, collectionmanager, dm);
+        CommandInvoker commandInvoker = new CommandInvoker();
+        CollectionManager collectionManager = new CollectionManager();
+        dm.readCollection(collectionManager);
+        CommandRegistr.register(commandInvoker, collectionManager, dm);
 
         StorageCommands storage = new StorageCommands();
-        RequestHandler requestHandler = new RequestHandler(commandinvoker, storage, dm);
+        RequestHandler requestHandler = new RequestHandler(commandInvoker, storage, dm);
 
-        logger.info("Сервер начал работу");
-        logger.info("Сервер запущен на {}", address);
+        logger.info("Сервер запущен на виртуальных потоках");
+        logger.info("Адрес: {}", address);
 
-        try (Scanner scanner = new Scanner(System.in);
-            DatagramChannel channel = DatagramChannel.open()) {
+        try (DatagramChannel channel = DatagramChannel.open();
+             Scanner scanner = new Scanner(System.in)) {
+
             Selector selector = Selector.open();
             channel.configureBlocking(false);
             channel.bind(address);
             channel.register(selector, SelectionKey.OP_READ);
-            
 
-            ByteBuffer buffer = ByteBuffer.allocate(65507); 
-            while(true){
-                if(System.in.available() > 0){
-                    String command = scanner.nextLine();
-                    if(command.equals("exit")){
+            ByteBuffer buffer = ByteBuffer.allocate(65507);
+
+            while (true) {
+                if (System.in.available() > 0) {
+                    String cmd = scanner.nextLine().trim();
+                    if (cmd.equals("exit")) {
                         logger.info("Сервер завершил работу");
                         System.exit(0);
                     }
@@ -82,47 +75,37 @@ public class Server {
 
                 selector.select(500);
                 Set<SelectionKey> keys = selector.selectedKeys();
-                for(var iter = keys.iterator(); iter.hasNext(); ){
+                for (var iter = keys.iterator(); iter.hasNext(); ) {
                     SelectionKey key = iter.next();
                     iter.remove();
-                    if(key.isValid()){
-                        if(key.isReadable()){
-                            buffer.clear();
-                            SocketAddress clientAddress = channel.receive(buffer);
-                            buffer.flip();
 
-                            byte[] data = new byte[buffer.limit()];
-                            buffer.get(data);
+                    if (key.isValid() && key.isReadable()) {
+                        buffer.clear();
+                        SocketAddress clientAddress = channel.receive(buffer);
+                        buffer.flip();
 
-                            byte[] finalData = data; 
-                            SocketAddress finalClientAddress = clientAddress;
-                            readPool.execute(() -> {
-                                    new Thread(() -> {
-                                        byte[] responseData = requestHandler.handle(finalData, finalClientAddress.toString());
-                                            if (responseData == null) {
-                                                logger.error("Ответ пустой, не отправляем");
-                                                return;
-                                            }
-                                        
-                                        new Thread(() -> {
-                                            try {
-                                                sendChunks(channel, responseData, finalClientAddress);
-                                            } catch (IOException e) {
-                                                logger.error("Ошибка отправки ответа", e);
-                                            }
-                                        }).start();
-                                    }).start();
-                                });
-                        }
+                        byte[] data = new byte[buffer.limit()];
+                        buffer.get(data);
+
+                        SocketAddress finalClientAddress = clientAddress;
+                        virtualPool.submit(() -> {
+                            try {
+                                byte[] responseData = requestHandler.handle(data, finalClientAddress.toString());
+                                if (responseData == null) {
+                                    logger.error("Ответ пустой, не отправляем");
+                                    return;
+                                }
+                                sendChunks(channel, responseData, finalClientAddress);
+                            } catch (Exception e) {
+                                logger.error("Ошибка в виртуальном потоке", e);
+                            }
+                        });
                     }
                 }
-
             }
-            
-        }
-        catch(Exception e){
+
+        } catch (Exception e) {
             logger.error("Ошибка сервера", e);
         }
     }
 }
-

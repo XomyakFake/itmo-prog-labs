@@ -1,6 +1,7 @@
 package ru.itmo.server.commands;
 
 import ru.itmo.common.models.*;
+import ru.itmo.common.network.JsonConverter;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
@@ -39,7 +40,7 @@ public class RemoveGreater implements Command {
     @Override
     public Response execute(Request request){
         try {
-            Movie target = (Movie) request.getCommandArg();
+            Movie target = JsonConverter.getMapper().convertValue(request.getCommandArg(), Movie.class);
             dm.removeGreater(target, request.getUser().getUsername());
 
             int bef = cm.getCollection().size();

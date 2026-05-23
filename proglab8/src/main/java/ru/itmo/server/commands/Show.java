@@ -1,10 +1,6 @@
 package ru.itmo.server.commands;
 
-import java.util.Comparator;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import ru.itmo.common.models.Movie;
+import java.util.ArrayList;
 import ru.itmo.common.network.*;
 import ru.itmo.server.modules.CollectionManager;
 
@@ -37,15 +33,18 @@ public class Show implements Command {
      * @return Успешность выполнения команды.
      */
     @Override
-    public Response execute(Request request){
-        CopyOnWriteArrayList<Movie> collection = collectionmanager.getCollection();
-        if(collectionmanager.getCollection().isEmpty()){
+    public Response execute(Request request) {
+        if (collectionmanager.getCollection().isEmpty()) {
             return new Response(true, "Коллекция пуста", null);
         }
-        else{
-            String data = collection.stream().sorted(Comparator.comparing(Movie::getName)).map(Movie::toString).collect(Collectors.joining("\n"));
-            return new Response(true, "Элементы коллекции ", data);
+        try {
+        // Возвращаем JSON-массив вместо toString()
+            String json = JsonConverter.toJson(
+                new ArrayList<>(collectionmanager.getCollection())
+            );
+            return new Response(true, "Элементы коллекции", json);
+         } catch (Exception e) {
+            return new Response(false, "Ошибка сериализации", null);
         }
-
     }
 }

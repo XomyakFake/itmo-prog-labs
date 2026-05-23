@@ -8,7 +8,7 @@ public class JwtToken {
     private static final Algorithm ALGORITHM = Algorithm.HMAC256("SECRET_KEY");
 
     public static String generateToken(String username) {
-        return JWT.create().withSubject(username).withExpiresAt(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).sign(ALGORITHM);
+        return JWT.create().withSubject(username).withExpiresAt(new Date(System.currentTimeMillis() + 15 * 60 * 1000)).sign(ALGORITHM);
     }
 
     public static String validateToken(String token) {

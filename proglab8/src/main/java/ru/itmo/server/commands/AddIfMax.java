@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import ru.itmo.common.exceptions.ValidateException;
 import ru.itmo.common.models.*;
+import ru.itmo.common.network.JsonConverter;
 import ru.itmo.common.network.Request;
 import ru.itmo.common.network.Response;
 import ru.itmo.server.modules.CollectionManager;
@@ -44,8 +45,8 @@ public class AddIfMax implements Command {
     @Override
     public Response execute(Request request){
         try{
-            Movie movie = (Movie) request.getCommandArg();
-            if(Collections.max(cm.getCollection()).compareTo(movie) < 0){
+            Movie movie = JsonConverter.getMapper().convertValue(request.getCommandArg(), Movie.class);
+            if(cm.getCollection().isEmpty() || Collections.max(cm.getCollection()).compareTo(movie) < 0){
                 int id = dm.addMovie(movie, request.getUser().getUsername());
                 movie.setId(id);
                 cm.addMovie(movie);
