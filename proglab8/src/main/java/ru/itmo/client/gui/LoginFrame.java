@@ -45,7 +45,8 @@ public class LoginFrame extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0; 
+        gbc.gridy = 0;
         mainPanel.add(new JLabel("Language:"), gbc);
 
         String[] languages = {"Русский", "Deutsch", "Svenska", "Español"};
@@ -59,26 +60,31 @@ public class LoginFrame extends JFrame {
             }
             updateTexts();
         });
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1; 
+        gbc.gridy = 0;
         mainPanel.add(comboBoxLanguage, gbc);
 
         labelUsername = new JLabel();
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0; 
+        gbc.gridy = 1;
         mainPanel.add(labelUsername, gbc);
         textFieldUsername = new JTextField(15);
         gbc.gridx = 1; gbc.gridy = 1;
         mainPanel.add(textFieldUsername, gbc);
 
         labelPassword = new JLabel();
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0; 
+        gbc.gridy = 2;
         mainPanel.add(labelPassword, gbc);
         passwordField = new JPasswordField(15);
-        gbc.gridx = 1; gbc.gridy = 2;
+        gbc.gridx = 1; 
+        gbc.gridy = 2;
         mainPanel.add(passwordField, gbc);
 
         labelCaptcha = new JLabel();
         labelCaptcha.setVisible(false);
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0; 
+        gbc.gridy = 3;
         mainPanel.add(labelCaptcha, gbc);
         textFieldCaptcha = new JTextField(15);
         textFieldCaptcha.setVisible(false);
@@ -91,7 +97,9 @@ public class LoginFrame extends JFrame {
         buttonPanel.add(buttonLogin);
         buttonPanel.add(buttonRegister);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+        gbc.gridx = 0; 
+        gbc.gridy = 4; 
+        gbc.gridwidth = 2;
         mainPanel.add(buttonPanel, gbc);
 
         buttonLogin.addActionListener(e -> sendAuthRequest(false));

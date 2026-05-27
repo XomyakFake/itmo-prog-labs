@@ -10,18 +10,16 @@ public class Response implements Serializable {
     private UUID responseId;
     private String token;
 
-    // 1. КРИТИЧЕСКИ ВАЖНО ДЛЯ JACKSON: Пустой конструктор
+
     public Response() {
     }
 
-    // Твой оригинальный конструктор
     public Response(boolean success, String message, String collection) {
         this.success = success;
         this.message = message;
         this.collection = collection;
     }
 
-    // Дополнительный удобный конструктор для простых ответов (ошибки/успех авторизации)
     public Response(String message, boolean success) {
         this.message = message;
         this.success = success;
@@ -31,7 +29,6 @@ public class Response implements Serializable {
         return success;
     }
 
-    // На всякий случай для Jackson, чтобы он точно сопоставил поле success
     public boolean getSuccess() {
         return success;
     }

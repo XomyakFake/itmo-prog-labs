@@ -5,10 +5,16 @@ import ru.itmo.common.models.MpaaRating;
 import ru.itmo.common.network.*;
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.ByteArrayOutputStream;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 
@@ -189,10 +195,10 @@ public class MainFrame extends JFrame {
         table.setRowHeight(22);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 11));
 
-        filterField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+        filterField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { applyFilter(); }
+            public void removeUpdate(DocumentEvent e) { applyFilter(); }
+            public void changedUpdate(DocumentEvent e) { applyFilter(); }
         });
         ratingFilter.addActionListener(e -> applyFilter());
 
@@ -209,7 +215,8 @@ public class MainFrame extends JFrame {
         }
         String rating = (String) ratingFilter.getSelectedItem();
         if (rating != null && !rating.equals("—")) {
-            filters.add(RowFilter.regexFilter("^" + rating + "$", 7));
+            String safeRating = rating.replace("_", "[-_ ]?"); 
+            filters.add(RowFilter.regexFilter("(?i)" + safeRating, 7));
         }
         sorter.setRowFilter(filters.isEmpty() ? null : RowFilter.andFilter(filters));
     }
@@ -230,19 +237,21 @@ public class MainFrame extends JFrame {
                     JOptionPane.YES_NO_OPTION
                 );
                 if (choice == JOptionPane.YES_OPTION) {
-                    Movie updated = MovieDialog.showEditDialog(
-                        MainFrame.this, bundle, currentUser, movie);
+                    Movie updated = MovieDialog.showEditDialog(MainFrame.this, bundle, currentUser, movie);
                     if (updated != null) {
+                        updated.setOwner(currentUser);
                         User user = new User(currentUser, "");
                         Request req = new Request("update", updated, user);
                         req.setToken(jwtToken);
                         try {
                             new NetworkWorker(req, host, port,
                                 new NetworkWorker.NetworkCallback() {
-                                    @Override public void onSuccess(String json) {
+                                    @Override 
+                                    public void onSuccess(String json) {
                                         fetchCollection();
                                     }
-                                    @Override public void onError(Throwable e) {}
+                                    @Override 
+                                    public void onError(Throwable e) {}
                                 }).execute();
                         } catch (Exception ex) { }
                     }
@@ -265,7 +274,7 @@ public class MainFrame extends JFrame {
     }
 
     private void startPolling() {
-        pollingTimer = new Timer(2000, e -> fetchCollection());
+        pollingTimer = new Timer(15000, e -> fetchCollection());
         pollingTimer.setInitialDelay(0);
         pollingTimer.start();
     }
@@ -288,7 +297,14 @@ public class MainFrame extends JFrame {
                                 visPanel.setMovies(movies);
                             });
                         }
-                    } catch (Exception ex) {
+                        else if (resp.isSuccess() && resp.getCollection() == null) {
+                            SwingUtilities.invokeLater(() -> {
+                                tableModel.setMovies(new ArrayList<>());
+                                visPanel.setMovies(new ArrayList<>());
+                            });
+                        } 
+                    }
+                    catch (Exception ex) {
                     }
                 }
                 @Override
@@ -302,9 +318,7 @@ public class MainFrame extends JFrame {
     private List<Movie> parseMovies(String raw) {
         if (raw == null || raw.isBlank()) return new ArrayList<>();
         try {
-            return JsonConverter.getMapper().readValue(
-                raw,
-                new com.fasterxml.jackson.core.type.TypeReference<List<Movie>>() {}
+            return JsonConverter.getMapper().readValue(raw, new TypeReference<List<Movie>>() {}
             );
         } catch (Exception e) {
             System.err.println("[parseMovies] Ошибка: " + e.getMessage());
@@ -340,6 +354,10 @@ public class MainFrame extends JFrame {
                         Response r = JsonConverter.fromJson(json, Response.class);
                         SwingUtilities.invokeLater(() ->
                             JOptionPane.showMessageDialog(MainFrame.this, r.getMessage()));
+                                if (r.isSuccess() && "clear".equals(name)) {
+                                tableModel.setMovies(new ArrayList<>());
+                                visPanel.setMovies(new ArrayList<>());
+                            }
                     } catch (Exception e) { }
                 }
                 @Override public void onError(Throwable e) {
@@ -392,6 +410,7 @@ public class MainFrame extends JFrame {
     private void openAddDialog() {
         Movie movie = MovieDialog.showAddDialog(this, bundle, currentUser);
         if (movie == null) return;
+        movie.setOwner(currentUser);
 
         String cmd = commandList.getSelectedValue();
         if (cmd == null) cmd = "add";
@@ -450,8 +469,7 @@ public class MainFrame extends JFrame {
             if (selected == null) return;
 
             User user = new User(currentUser, "");
-            Request req = new Request("filter_greater_than_mpaa_rating",
-                selected.name(), user);
+            Request req = new Request("filter_greater_than_mpaa_rating", selected.name(), user);
             req.setToken(jwtToken);
 
             try {
@@ -483,11 +501,7 @@ public class MainFrame extends JFrame {
             } catch (Exception ex) { }
         });
 
-        dialog.getRootPane().registerKeyboardAction(
-            e -> dialog.dispose(),
-            KeyStroke.getKeyStroke("ESCAPE"),
-            JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
+        dialog.getRootPane().registerKeyboardAction(e -> dialog.dispose(),KeyStroke.getKeyStroke("ESCAPE"),JComponent.WHEN_IN_FOCUSED_WINDOW);
         dialog.setVisible(true);
     }
 
@@ -574,7 +588,45 @@ public class MainFrame extends JFrame {
             JOptionPane.showMessageDialog(this, bundle.getString("error.not_owner"));
             return;
         }
-        JOptionPane.showMessageDialog(this, "Редактирование id=" + m.getId() + " — TODO");
+
+        Movie updatedMovie = MovieDialog.showEditDialog(this, bundle, currentUser, m);
+        if (updatedMovie == null) {
+            return;
+        }
+
+        updatedMovie.setOwner(currentUser);
+
+        User user = new User(currentUser, "");
+        Request req = new Request("update", updatedMovie, user);
+        req.setToken(jwtToken);
+
+        try {
+            new NetworkWorker(req, host, port, new NetworkWorker.NetworkCallback() {
+                @Override
+                public void onSuccess(String json) {
+                    try {
+                        Response r = JsonConverter.fromJson(json, Response.class);
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(MainFrame.this, r.getMessage());
+                            if (r.isSuccess()) {
+                                fetchCollection(); 
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    SwingUtilities.invokeLater(() ->
+                        JOptionPane.showMessageDialog(MainFrame.this, 
+                            bundle.getString("error.title") + ": " + e.getMessage()));
+                }
+            }).execute();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void deleteSelected() {
@@ -647,41 +699,56 @@ public class MainFrame extends JFrame {
     }
 }
 
-    private Request buildRequestFromScript(String cmd, String arg) {
-        User user = new User(currentUser, "");
+private Request buildRequestFromScript(String cmd, String arg) {
+    User user = new User(currentUser, "");
 
-        return switch (cmd) {
-            case "add", "add_if_max", "remove_greater" -> {
-                if (arg == null) yield null;
-                Movie movie = Movie.fromArrayNoId(arg.split(",", -1));
-                if (movie == null || !movie.validate()) yield null;
-                yield new Request(cmd, movie, user);
+    switch (cmd) {
+        case "add":
+        case "add_if_max":
+        case "remove_greater":
+            if (arg == null) return null;
+            Movie movie = Movie.fromArrayNoId(arg.split(",", -1));
+            if (movie == null || !movie.validate()) return null;
+            
+            movie.setOwner(currentUser); 
+            
+            return new Request(cmd, movie, user);
+
+        case "update":
+            if (arg == null) return null;
+            String[] parts = arg.split(",", 2);
+            if (parts.length < 2) return null;
+            try {
+                int id = Integer.parseInt(parts[0].strip());
+                Movie updateMovie = Movie.fromArrayNoId(parts[1].split(",", -1));
+                if (updateMovie == null || !updateMovie.validate()) return null;
+                
+                updateMovie.setId(id);
+                updateMovie.setOwner(currentUser); 
+                
+                return new Request(cmd, updateMovie, user);
+            } catch (NumberFormatException e) {
+                return null;
             }
-            case "update" -> {
-                if (arg == null) yield null;
-                String[] parts = arg.split(",", 2);
-                if (parts.length < 2) yield null;
-                try {
-                    int id = Integer.parseInt(parts[0].strip());
-                    Movie movie = Movie.fromArrayNoId(parts[1].split(",", -1));
-                    if (movie == null || !movie.validate()) yield null;
-                    movie.setId(id);
-                    yield new Request(cmd, movie, user);
-                } catch (NumberFormatException e) {
-                    yield null;
-                }
-            }
-            case "remove_by_id", "filter_greater_than_mpaa_rating" -> {
-                if (arg == null) yield null;
-                yield new Request(cmd, arg, user);
-            }
-            case "help", "info", "show", "clear",
-                "history", "print_descending",
-                "print_field_descending_tagline" ->
-                new Request(cmd, null, user);
-            default -> null;
-        };
+
+        case "remove_by_id":
+        case "filter_greater_than_mpaa_rating":
+            if (arg == null) return null;
+            return new Request(cmd, arg, user);
+
+        case "help":
+        case "info":
+        case "show":
+        case "clear":
+        case "history":
+        case "print_descending":
+        case "print_field_descending_tagline":
+            return new Request(cmd, null, user);
+
+        default:
+            return null;
     }
+}
 
     private String sendSync(Request req) {
     try {
@@ -691,22 +758,19 @@ public class MainFrame extends JFrame {
         try (java.net.DatagramSocket socket = new java.net.DatagramSocket()) {
             socket.setSoTimeout(3000);
 
-            java.net.DatagramPacket send = new java.net.DatagramPacket(
-                bytes, bytes.length, host, port);
+            DatagramPacket send = new DatagramPacket(bytes, bytes.length, host, port);
             socket.send(send);
 
-            java.io.ByteArrayOutputStream chunks =
-                new java.io.ByteArrayOutputStream();
+            ByteArrayOutputStream chunks =new ByteArrayOutputStream();
             while (true) {
                 byte[] buf = new byte[60001];
-                java.net.DatagramPacket recv =
-                    new java.net.DatagramPacket(buf, buf.length);
+                java.net.DatagramPacket recv = new java.net.DatagramPacket(buf, buf.length);
                 socket.receive(recv);
                 boolean isLast = buf[recv.getLength() - 1] == 1;
                 chunks.write(buf, 0, recv.getLength() - 1);
                 if (isLast) break;
             }
-            return chunks.toString(java.nio.charset.StandardCharsets.UTF_8).trim();
+            return chunks.toString(StandardCharsets.UTF_8).trim();
         }
     } catch (Exception e) {
         System.err.println("[sendSync] Ошибка: " + e.getMessage());
@@ -725,8 +789,7 @@ public class MainFrame extends JFrame {
     bar.setIndeterminate(true);
     bar.setBorder(BorderFactory.createEmptyBorder(16, 16, 8, 16));
 
-    JLabel label = new JLabel(bundle.getString("script.running"),
-        SwingConstants.CENTER);
+    JLabel label = new JLabel(bundle.getString("script.running"), SwingConstants.CENTER);
     label.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
     d.add(label, BorderLayout.NORTH);

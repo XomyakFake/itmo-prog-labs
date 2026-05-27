@@ -5,17 +5,25 @@ import javax.swing.SwingUtilities;
 import ru.itmo.client.gui.LoginFrame;
 
 public class Client {
-    private InetAddress host;
-    private int port;
+    private final InetAddress host;
+    private final int port;
 
-    public Client(InetAddress host, int port){
+    public Client(InetAddress host, int port) {
         this.host = host;
         this.port = port;
     }
 
-    public void run(){
-        System.out.println("Запуск клиентского приложения...");
+    public void run() {
+        System.out.println("[Client] Запуск клиентского приложения на порту " + port);
 
-        SwingUtilities.invokeLater(() -> { new LoginFrame(host, port).setVisible(true);});
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new LoginFrame(host, port).setVisible(true);
+                System.out.println("[Client] Окно LoginFrame успешно выведено на экран.");
+            } catch (Exception e) {
+                System.err.println("[Client] Не удалось инициализировать GUI:");
+                e.printStackTrace();
+            }
+        });
     }
 }

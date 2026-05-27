@@ -1,22 +1,19 @@
 package ru.itmo.client;
 
 import java.net.InetAddress;
-import javax.swing.SwingUtilities;
-import ru.itmo.client.gui.LoginFrame;
+import ru.itmo.client.util.Client;
 
 public class Main {
     public static void main(String[] args) {
         try {
             InetAddress host = InetAddress.getByName("localhost");
             int port = 8000;
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    new LoginFrame(host, port).setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            
+            Client client = new Client(host, port);
+            client.run(); 
+            
         } catch (Exception e) {
+            System.err.println("Критическая ошибка при старте приложения:");
             e.printStackTrace();
         }
     }

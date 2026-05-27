@@ -284,8 +284,7 @@ public class MovieDialog extends JDialog {
         return d.isConfirmed() ? d.getResult() : null;
     }
 
-    public static Movie showEditDialog(Frame parent, ResourceBundle bundle,
-                                    String user, Movie existing) {
+    public static Movie showEditDialog(Frame parent, ResourceBundle bundle, String user, Movie existing) {
         MovieDialog d = new MovieDialog(parent, bundle, existing);
         d.setVisible(true);
         return d.isConfirmed() ? d.getResult() : null;
