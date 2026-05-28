@@ -3027,3 +3027,29 @@ Caused by: org.postgresql.util.PSQLException: This connection has been closed.
 01:06:46 [] INFO  r.itmo.server.modules.CommandInvoker [85dcb78d-a070-48a9-a9d6-eeb9badb67c3] - Выполнение команды show
 01:06:46 [] INFO  r.itmo.server.modules.RequestHandler [85dcb78d-a070-48a9-a9d6-eeb9badb67c3] - Команда show выполнена
 01:06:58 [main] INFO  ru.itmo.server.modules.Server [] - Сервер завершил работу
+16:02:40 [main] INFO  r.i.server.modules.CollectionManager [] - Фильм с ID=22 добавлен
+16:02:40 [main] INFO  r.i.server.modules.CollectionManager [] - Фильм с ID=23 добавлен
+16:02:40 [main] INFO  ru.itmo.server.modules.Server [] - Сервер запущен на виртуальных потоках
+16:02:40 [main] INFO  ru.itmo.server.modules.Server [] - Адрес: 0.0.0.0/0.0.0.0:8000
+16:03:06 [] INFO  r.itmo.server.modules.RequestHandler [ccf4192a-d634-4245-bd9c-3de6591df4a3] - Команда show от /127.0.0.1:60623
+16:03:06 [] INFO  r.itmo.server.modules.CommandInvoker [ccf4192a-d634-4245-bd9c-3de6591df4a3] - Выполнение команды show
+16:03:06 [] INFO  r.itmo.server.modules.RequestHandler [ccf4192a-d634-4245-bd9c-3de6591df4a3] - Команда show выполнена
+16:03:21 [] INFO  r.itmo.server.modules.RequestHandler [457edd1f-9bf9-4655-a6f7-8186046226e3] - Команда show от /127.0.0.1:40217
+16:03:21 [] INFO  r.itmo.server.modules.CommandInvoker [457edd1f-9bf9-4655-a6f7-8186046226e3] - Выполнение команды show
+16:03:21 [] INFO  r.itmo.server.modules.RequestHandler [457edd1f-9bf9-4655-a6f7-8186046226e3] - Команда show выполнена
+16:03:36 [] INFO  r.itmo.server.modules.RequestHandler [80009f2d-1f94-41c0-9009-4d8e8eb1701b] - Команда show от /127.0.0.1:56791
+16:03:36 [] INFO  r.itmo.server.modules.CommandInvoker [80009f2d-1f94-41c0-9009-4d8e8eb1701b] - Выполнение команды show
+16:03:36 [] INFO  r.itmo.server.modules.RequestHandler [80009f2d-1f94-41c0-9009-4d8e8eb1701b] - Команда show выполнена
+16:03:51 [] INFO  r.itmo.server.modules.RequestHandler [75ba1257-d067-4d33-981e-44cf448d3a33] - Команда show от /127.0.0.1:54976
+16:03:51 [] INFO  r.itmo.server.modules.CommandInvoker [75ba1257-d067-4d33-981e-44cf448d3a33] - Выполнение команды show
+16:03:51 [] INFO  r.itmo.server.modules.RequestHandler [75ba1257-d067-4d33-981e-44cf448d3a33] - Команда show выполнена
+16:04:06 [] INFO  r.itmo.server.modules.RequestHandler [3f2a609a-7d3f-497e-8a4c-ea0bdbd20e7a] - Команда show от /127.0.0.1:51721
+16:04:06 [] INFO  r.itmo.server.modules.CommandInvoker [3f2a609a-7d3f-497e-8a4c-ea0bdbd20e7a] - Выполнение команды show
+16:04:06 [] INFO  r.itmo.server.modules.RequestHandler [3f2a609a-7d3f-497e-8a4c-ea0bdbd20e7a] - Команда show выполнена
+16:04:21 [] INFO  r.itmo.server.modules.RequestHandler [de7ff184-4f2f-40c0-a928-075f60c09b08] - Команда show от /127.0.0.1:53704
+16:04:21 [] INFO  r.itmo.server.modules.CommandInvoker [de7ff184-4f2f-40c0-a928-075f60c09b08] - Выполнение команды show
+16:04:21 [] INFO  r.itmo.server.modules.RequestHandler [de7ff184-4f2f-40c0-a928-075f60c09b08] - Команда show выполнена
+16:04:36 [] INFO  r.itmo.server.modules.RequestHandler [f48dee30-264e-41ed-9344-48cfee1f2be7] - Команда show от /127.0.0.1:36375
+16:04:36 [] INFO  r.itmo.server.modules.CommandInvoker [f48dee30-264e-41ed-9344-48cfee1f2be7] - Выполнение команды show
+16:04:36 [] INFO  r.itmo.server.modules.RequestHandler [f48dee30-264e-41ed-9344-48cfee1f2be7] - Команда show выполнена
+16:04:56 [main] INFO  ru.itmo.server.modules.Server [] - Сервер завершил работу

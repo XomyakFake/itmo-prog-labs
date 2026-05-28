@@ -221,57 +221,43 @@ public class MainFrame extends JFrame {
         sorter.setRowFilter(filters.isEmpty() ? null : RowFilter.andFilter(filters));
     }
 
+    private void selectMovieInTable(Movie movie) {
+    if (movie == null) {
+        table.clearSelection();
+        return;
+    }
+    for (int i = 0; i < tableModel.getRowCount(); i++) {
+        int viewRow = table.convertRowIndexToView(i);
+        if (viewRow < 0) continue;
+        Movie m = tableModel.getMovieAt(i);
+        if (m.getId().equals(movie.getId())) {
+            table.setRowSelectionInterval(viewRow, viewRow);
+            table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+            Container parent = table.getParent();
+            while (parent != null && !(parent instanceof JTabbedPane)) {
+                parent = parent.getParent();
+            }
+            if (parent instanceof JTabbedPane tabs) {
+                tabs.setSelectedIndex(0);
+            }
+            return;
+        }
+    }
+    }
+
     private JPanel buildVisPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         visPanel = new VisualizationPanel();
-
         visPanel.setOnMovieClickListener(movie -> {
-            if (currentUser.equals(movie.getOwner())) {
-                int choice = JOptionPane.showConfirmDialog(
-                    MainFrame.this,
-                    String.format("%s%nОскары: %d%nРейтинг: %s%n%nРедактировать?",
-                        movie.getName(),
-                        movie.getOscarsCount(),
-                        movie.getMpaaRating() != null ? movie.getMpaaRating().name() : "—"),
-                    movie.getName(),
-                    JOptionPane.YES_NO_OPTION
-                );
-                if (choice == JOptionPane.YES_OPTION) {
-                    Movie updated = MovieDialog.showEditDialog(MainFrame.this, bundle, currentUser, movie);
-                    if (updated != null) {
-                        updated.setOwner(currentUser);
-                        User user = new User(currentUser, "");
-                        Request req = new Request("update", updated, user);
-                        req.setToken(jwtToken);
-                        try {
-                            new NetworkWorker(req, host, port,
-                                new NetworkWorker.NetworkCallback() {
-                                    @Override 
-                                    public void onSuccess(String json) {
-                                        fetchCollection();
-                                    }
-                                    @Override 
-                                    public void onError(Throwable e) {}
-                                }).execute();
-                        } catch (Exception ex) { }
-                    }
-                }
-            } else {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this,
-                    String.format("Название: %s%nВладелец: %s%nОскары: %d%nРейтинг: %s",
-                        movie.getName(), movie.getOwner(),
-                        movie.getOscarsCount(),
-                        movie.getMpaaRating() != null ? movie.getMpaaRating().name() : "—"),
-                    movie.getName(),
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-            }
+            selectMovieInTable(movie);
         });
 
         panel.add(visPanel, BorderLayout.CENTER);
         return panel;
     }
+
+
+       
 
     private void startPolling() {
         pollingTimer = new Timer(15000, e -> fetchCollection());
