@@ -2,6 +2,7 @@ package ru.itmo.client.gui;
 
 import ru.itmo.common.models.Movie;
 import ru.itmo.common.models.MpaaRating;
+import ru.itmo.common.models.Person;
 import ru.itmo.common.network.*;
 import javax.swing.*;
 import javax.swing.Timer;
@@ -44,12 +45,15 @@ public class MainFrame extends JFrame {
 
     private Timer pollingTimer;
 
-    public MainFrame(String username, String token, InetAddress host, int port) {
+    private Locale currentLocale;
+
+    public MainFrame(String username, String token, InetAddress host, int port, Locale locale) {
         this.currentUser = username;
         this.jwtToken = token;
         this.host = host;
         this.port = port;
-        applyLocale(Locale.of("ru"));
+        currentLocale = locale;
+        applyLocale(locale);
         initUI();
         startPolling();
     }
@@ -69,6 +73,17 @@ public class MainFrame extends JFrame {
         add(buildTopBar(), BorderLayout.NORTH);
         add(buildSidebar(), BorderLayout.WEST);
         add(buildMainContent(), BorderLayout.CENTER);
+
+        langCombo.addActionListener(e -> {
+            Locale loc = switch (langCombo.getSelectedIndex()) {
+                case 1 -> Locale.of("de");
+                case 2 -> Locale.of("sv");
+                case 3 -> Locale.of("es", "ES");
+                default -> Locale.of("ru");
+            };
+            applyLocale(loc);
+            updateAllTexts();
+        });
     }
 
     private JPanel buildTopBar() {
@@ -90,19 +105,21 @@ public class MainFrame extends JFrame {
 
         String[] langs = {"Русский", "Deutsch", "Svenska", "Español"};
         langCombo = new JComboBox<>(langs);
-        langCombo.addActionListener(e -> {
-            Locale loc = switch (langCombo.getSelectedIndex()) {
-                case 1 -> Locale.of("de");
-                case 2 -> Locale.of("sv");
-                case 3 -> Locale.of("es", "ES");
-                default -> Locale.of("ru");
-            };
-            applyLocale(loc);
-            updateAllTexts();
-        });
+
+        langCombo.setSelectedIndex(getLocaleIndex());
         right.add(langCombo);
         bar.add(right, BorderLayout.EAST);
         return bar;
+    }
+
+    private int getLocaleIndex() {
+    String lang = currentLocale.getLanguage();
+    return switch (lang) {
+        case "de" -> 1;
+        case "sv" -> 2;
+        case "es" -> 3;
+        default   -> 0;
+    };
     }
 
     private JPanel buildSidebar() {
@@ -204,6 +221,36 @@ public class MainFrame extends JFrame {
 
         panel.add(filterRow, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            int row = table.rowAtPoint(e.getPoint());
+            if (row < 0) {
+                table.setToolTipText(null);
+                return;
+            }
+            int modelRow = table.convertRowIndexToModel(row);
+            Movie m = tableModel.getMovieAt(modelRow);
+            
+            if (m.getDirector() != null) {
+                Person d = m.getDirector();
+                String eye  = d.getEyeColor()  != null ? d.getEyeColor().name()  : "—";
+                String hair = d.getHairColor() != null ? d.getHairColor().name() : "—";
+                String nat  = d.getNationality() != null ? d.getNationality().name() : "—";
+                
+                table.setToolTipText(String.format(
+                    "<html><b>%s</b><br>" +
+                    "Цвет глаз: %s<br>" +
+                    "Цвет волос: %s<br>" +
+                    "Национальность: %s</html>",
+                    d.getName(), eye, hair, nat
+                ));
+            } else {
+                table.setToolTipText(bundle.getString("tooltip.no_director"));
+            }
+        }
+        });
         return panel;
     }
 
@@ -324,7 +371,27 @@ public class MainFrame extends JFrame {
             case "show"  -> fetchCollection();
             case "add_if_max" -> openAddDialog();
             case "filter_greater_than_mpaa_rating" -> openRatingFilterDialog();
-            case "remove_greater" -> openAddDialog();
+            case "remove_greater" -> {
+                    Movie movie = MovieDialog.showRemoveGreaterDialog(this, bundle, currentUser);
+                    if (movie == null) return;
+                    User user = new User(currentUser, "");
+                    Request req = new Request("remove_greater", movie, user);
+                    req.setToken(jwtToken);
+                    try {
+                        new NetworkWorker(req, host, port, new NetworkWorker.NetworkCallback() {
+                            @Override public void onSuccess(String json) {
+                                try {
+                                    Response r = JsonConverter.fromJson(json, Response.class);
+                                    SwingUtilities.invokeLater(() -> {
+                                        JOptionPane.showMessageDialog(MainFrame.this, r.getMessage());
+                                        if (r.isSuccess()) fetchCollection();
+                                    });
+                                } catch (Exception e) { }
+                            }
+                            @Override public void onError(Throwable e) {}
+                        }).execute();
+                    } catch (Exception ex) { }
+                }
             case "execute_script" -> openScriptDialog();
         }
     }
@@ -492,74 +559,129 @@ public class MainFrame extends JFrame {
     }
 
     private void openScriptDialog() {
-        JFileChooser fc = new JFileChooser();
-        fc.setDialogTitle(bundle.getString("dialog.script.title"));
-        if (fc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+    JFileChooser fc = new JFileChooser();
+    fc.setDialogTitle(bundle.getString("dialog.script.title"));
+    int result = fc.showOpenDialog(this);
 
-        java.io.File file = fc.getSelectedFile();
-        if (!file.exists() || !file.canRead()) {
-            JOptionPane.showMessageDialog(this,
-                bundle.getString("error.script.read"),
-                bundle.getString("error.title"),
-                JOptionPane.ERROR_MESSAGE);
-            return;
+    if (result != JFileChooser.APPROVE_OPTION) return;
+
+    java.io.File file = fc.getSelectedFile();
+
+    if (!file.exists() || !file.canRead()) {
+        JOptionPane.showMessageDialog(this,
+            bundle.getString("error.script.read"),
+            bundle.getString("error.title"),
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    String absPath = file.getAbsolutePath();
+    if (runningScripts.contains(absPath)) {
+        JOptionPane.showMessageDialog(this,
+            bundle.getString("error.script.recursion"),
+            bundle.getString("error.title"),
+            JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    runningScripts.add(absPath);
+
+    JTextArea logArea = new JTextArea();
+    logArea.setEditable(false);
+    logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+    logArea.setMargin(new Insets(8, 8, 8, 8));
+
+    // Сразу пишем заголовок — окно не будет пустым
+    logArea.append("Скрипт: " + file.getName() + "\n");
+    logArea.append("─".repeat(40) + "\n");
+
+    JDialog logDialog = new JDialog(this,
+        bundle.getString("script.running"), false);
+    logDialog.setSize(520, 380);
+    logDialog.setLocationRelativeTo(this);
+    logDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    logDialog.setLayout(new BorderLayout(8, 8));
+
+    JTextArea logArea1 = new JTextArea();
+    logArea1.setEditable(false);
+    logArea1.setFont(new Font("Monospaced", Font.PLAIN, 12));
+    logArea1.setMargin(new Insets(8, 8, 8, 8));
+    logArea1.append("Скрипт: " + file.getName() + "\n");
+    logArea1.append("─".repeat(40) + "\n");
+
+    JButton closeBtn = new JButton(bundle.getString("button.cancel"));
+    closeBtn.setEnabled(false);
+    closeBtn.addActionListener(e -> logDialog.dispose()); // теперь logDialog уже объявлен
+
+    JScrollPane scroll = new JScrollPane(logArea1);
+    scroll.setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 8));
+    logDialog.add(scroll, BorderLayout.CENTER);
+
+    JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+    bottom.add(closeBtn);
+    logDialog.add(bottom, BorderLayout.SOUTH);
+
+    logDialog.setVisible(true);
+
+
+
+    SwingWorker<Void, String> worker = new SwingWorker<>() {
+        @Override
+        protected Void doInBackground() throws Exception {
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(
+                        new java.io.FileInputStream(file), "UTF-8"))) {
+
+                String line;
+                int lineNum = 0;
+
+                while ((line = reader.readLine()) != null) {
+                    line = line.strip();
+                    if (line.isEmpty()) continue;
+
+                    lineNum++;
+                    publish("▶ [" + lineNum + "] " + line);
+
+                    String[] parts = line.split(" ", 2);
+                    String cmd = parts[0].toLowerCase();
+                    String arg = parts.length > 1 ? parts[1].strip() : null;
+
+                    String cmdResult = executeScriptCommandWithLog(cmd, arg);
+                    publish("  → " + cmdResult);
+
+                    Thread.sleep(300);
+                }
+            }
+            return null;
         }
 
-        String absPath = file.getAbsolutePath();
-        if (runningScripts.contains(absPath)) {
-            JOptionPane.showMessageDialog(this,
-                bundle.getString("error.script.recursion"),
-                bundle.getString("error.title"),
-                JOptionPane.WARNING_MESSAGE);
-            return;
+        @Override
+        protected void process(java.util.List<String> chunks) {
+            for (String msg : chunks) {
+                logArea1.append(msg + "\n");
+            }
+            // автоскролл вниз
+            logArea1.setCaretPosition(logArea1.getDocument().getLength());
         }
 
-        runningScripts.add(absPath);
-        JDialog progressDialog = buildProgressDialog();
-        progressDialog.setVisible(true);
-
-        SwingWorker<Void, String> worker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                try (java.io.BufferedReader reader = new java.io.BufferedReader(
-                        new java.io.InputStreamReader(
-                            new java.io.FileInputStream(file), "UTF-8"))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        line = line.strip();
-                        if (line.isEmpty()) continue;
-
-                        String[] parts = line.split(" ", 2);
-                        String cmd = parts[0].toLowerCase();
-                        String arg = parts.length > 1 ? parts[1].strip() : null;
-
-                        publish(cmd);
-                        executeScriptCommand(cmd, arg);
-
-                        Thread.sleep(200);
-                    }
-                }
-                return null;
+        @Override
+        protected void done() {
+            runningScripts.remove(absPath);
+            try {
+                get();
+                logArea1.append("\n" + "─".repeat(40) + "\n");
+                logArea1.append("✓ " + bundle.getString("script.done") + "\n");
+            } catch (Exception e) {
+                logArea1.append("\n✗ " + bundle.getString("error.script.failed")
+                    + ": " + e.getMessage() + "\n");
             }
-
-            @Override
-            protected void done() {
-                runningScripts.remove(absPath);
-                progressDialog.dispose();
-                try {
-                    get();
-                    JOptionPane.showMessageDialog(MainFrame.this,
-                        bundle.getString("script.done"));
-                    fetchCollection();
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(MainFrame.this,
-                        bundle.getString("error.script.failed") + ": " + e.getMessage(),
-                        bundle.getString("error.title"),
-                        JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        };
-        worker.execute();
+            logArea1.setCaretPosition(logArea1.getDocument().getLength());
+            closeBtn.setText(bundle.getString("button.ok"));
+            closeBtn.setEnabled(true);
+            fetchCollection();
+        }
+    };
+    worker.execute();   
     }
 
     private void editSelected() {
@@ -658,32 +780,25 @@ public class MainFrame extends JFrame {
         repaint();
     }
 
-    private void executeScriptCommand(String cmd, String arg) {
-    if (cmd.equals("exit")) {
-        SwingUtilities.invokeLater(this::logout);
-        return;
-    }
 
-    if (cmd.equals("execute_script")) {
-        return;
-    }
+    private String executeScriptCommandWithLog(String cmd, String arg) {
+        if (cmd.equals("exit")) return "exit — пропущено в GUI";
+        if (cmd.equals("execute_script")) return "рекурсия — пропущено";
 
-    try {
-        Request req = buildRequestFromScript(cmd, arg);
-        if (req == null) return;
-        req.setToken(jwtToken);
+        try {
+            Request req = buildRequestFromScript(cmd, arg);
+            if (req == null) return "⚠ не удалось построить запрос";
+            req.setToken(jwtToken);
 
-        String json = sendSync(req);
-        if (json != null) {
+            String json = sendSync(req);
+            if (json == null) return "⚠ нет ответа от сервера";
+
             Response r = JsonConverter.fromJson(json, Response.class);
-            if (!r.isSuccess()) {
-                System.err.println("[script] " + cmd + ": " + r.getMessage());
-            }
+            return (r.isSuccess() ? "✓ " : "✗ ") + r.getMessage();
+        } catch (Exception e) {
+            return "✗ ошибка: " + e.getMessage();
         }
-    } catch (Exception e) {
-        System.err.println("[script] Ошибка команды " + cmd + ": " + e.getMessage());
     }
-}
 
 private Request buildRequestFromScript(String cmd, String arg) {
     User user = new User(currentUser, "");
@@ -764,23 +879,5 @@ private Request buildRequestFromScript(String cmd, String arg) {
     }
     }
 
-    private JDialog buildProgressDialog() {
-    JDialog d = new JDialog(this, bundle.getString("script.running"), false);
-    d.setSize(280, 100);
-    d.setLocationRelativeTo(this);
-    d.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-    d.setLayout(new BorderLayout(8, 8));
-
-    JProgressBar bar = new JProgressBar();
-    bar.setIndeterminate(true);
-    bar.setBorder(BorderFactory.createEmptyBorder(16, 16, 8, 16));
-
-    JLabel label = new JLabel(bundle.getString("script.running"), SwingConstants.CENTER);
-    label.setFont(new Font("SansSerif", Font.PLAIN, 12));
-
-    d.add(label, BorderLayout.NORTH);
-    d.add(bar, BorderLayout.CENTER);
-    return d;
-    }
 
 }

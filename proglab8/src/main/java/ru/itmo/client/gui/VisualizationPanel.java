@@ -48,7 +48,7 @@ public class VisualizationPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Movie found = findMovieAt(e.getX(), e.getY());
-                if (found != null) showMovieInfo(found);
+                if (clickListener != null) clickListener.onMovieClick(found);
             }
         });
     }
@@ -61,11 +61,17 @@ public class VisualizationPanel extends JPanel {
     }
 
     private void rebuildColorMap() {
+        int colorIndex = 0;
         for (Movie m : movies) {
             String owner = m.getOwner() != null ? m.getOwner() : "unknown";
             if (!userColorMap.containsKey(owner)) {
-                int idx = Math.abs(owner.hashCode()) % USER_COLORS.length;
-                userColorMap.put(owner, USER_COLORS[idx]);
+                if (colorIndex < USER_COLORS.length) {
+                    userColorMap.put(owner, USER_COLORS[colorIndex]);
+                    colorIndex++;
+                } else {
+                    int idx = Math.abs(owner.hashCode()) % USER_COLORS.length;
+                    userColorMap.put(owner, USER_COLORS[idx]);
+                }
             }
         }
     }
@@ -210,11 +216,6 @@ public class VisualizationPanel extends JPanel {
         return null;
     }
 
-    private void showMovieInfo(Movie m) {
-        if (clickListener != null) {
-            clickListener.onMovieClick(m);
-        }
-    }
 
     public Map<String, Color> getUserColorMap() { return userColorMap; }
 

@@ -26,6 +26,7 @@ public class LoginFrame extends JFrame {
 
     private final InetAddress serverHost;
     private final int serverPort;
+    private Locale currentLocale = Locale.of("ru");
 
     public LoginFrame(InetAddress host, int port) {
         this.serverHost = host;
@@ -117,7 +118,9 @@ public class LoginFrame extends JFrame {
     }
 
     private void setLanguage(Locale locale) {
+        this.currentLocale = locale;
         this.resourceBundle = ResourceBundle.getBundle("gui", locale, this.getClass().getClassLoader());
+
     }
 
     private void updateTexts() {
@@ -183,7 +186,7 @@ public class LoginFrame extends JFrame {
                             SwingUtilities.invokeLater(() -> {
                                 try {
                                     System.out.println("Создаём MainFrame для: " + user);
-                                    MainFrame frame = new MainFrame(user, token, serverHost, serverPort);
+                                    MainFrame frame = new MainFrame(user, token, serverHost, serverPort, currentLocale);
                                     System.out.println("MainFrame создан");
                                     frame.setVisible(true);
                                     System.out.println("MainFrame visible");

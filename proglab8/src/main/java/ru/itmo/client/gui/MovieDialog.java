@@ -37,16 +37,19 @@ public class MovieDialog extends JDialog {
     private JComboBox<String> fieldDirHair;
     private JComboBox<String> fieldDirNationality;
 
-    public MovieDialog(Frame parent, ResourceBundle bundle, Movie existing) {
+    public MovieDialog(Frame parent, ResourceBundle bundle, Movie existing, String commandName) {
         super(parent, true);
         this.bundle = bundle;
-        initUI(existing);
+        initUI(existing, commandName);
     }
 
-    private void initUI(Movie existing) {
-        setTitle(existing == null
-            ? bundle.getString("dialog.add.title")
-            : bundle.getString("dialog.edit.title"));
+    private void initUI(Movie existing, String commandName) {
+        String title = switch (commandName) {
+            case "update" -> bundle.getString("dialog.edit.title");
+            case "remove_greater" -> bundle.getString("dialog.remove_greater.title");
+            default -> bundle.getString("dialog.add.title");
+        };
+        setTitle(title);
         setSize(460, 580);
         setResizable(false);
         setLocationRelativeTo(getParent());
@@ -59,36 +62,29 @@ public class MovieDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         int row = 0;
+        fieldName    = addRow(form, gbc, row++, bundle.getString("col.name"),    "", true);
+        fieldX       = addRow(form, gbc, row++, "X",                             "", true);
+        fieldY       = addRow(form, gbc, row++, "Y",                             "", true);
+        fieldOscars  = addRow(form, gbc, row++, bundle.getString("col.oscars"),  "", true);
+        fieldPalm    = addRow(form, gbc, row++, bundle.getString("col.palm"),    "", true);
+        fieldTagline = addRow(form, gbc, row++, bundle.getString("col.tagline"), "", false);
 
-        fieldName = addRow(form, gbc, row++,
-            bundle.getString("col.name"), "");
-        fieldX = addRow(form, gbc, row++, "X", "");
-        fieldY = addRow(form, gbc, row++, "Y", "");
-        fieldOscars = addRow(form, gbc, row++,
-            bundle.getString("col.oscars"), "");
-        fieldPalm = addRow(form, gbc, row++,
-            bundle.getString("col.palm"), "");
-        fieldTagline = addRow(form, gbc, row++,
-            bundle.getString("col.tagline"), "");
-
-        gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0;
-        form.add(new JLabel(bundle.getString("col.rating") + ":"), gbc);
+        gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0; gbc.gridwidth = 1;
+        form.add(new JLabel("<html>" + bundle.getString("col.rating") + " <font color='red'>*</font>:</html>"), gbc);
         fieldRating = new JComboBox<>(MpaaRating.values());
         gbc.gridx = 1; gbc.weightx = 1;
         form.add(fieldRating, gbc);
         row++;
 
-        gbc.gridx = 0; gbc.gridy = row++; gbc.gridwidth = 2;
-        JLabel dirLabel = new JLabel(bundle.getString("col.director"));
+        gbc.gridx = 0; gbc.gridy = row++; gbc.gridwidth = 2; gbc.weightx = 0;
+        JLabel dirLabel = new JLabel("<html><b>" + bundle.getString("col.director") + "</b> <font color='gray'><i>(" + bundle.getString("dialog.optional") + ")</i></font></html>");
         dirLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
         dirLabel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, java.awt.Color.LIGHT_GRAY));
         form.add(dirLabel, gbc);
         gbc.gridwidth = 1;
 
-        fieldDirName = addRow(form, gbc, row++,
-            bundle.getString("dialog.dir.name"), "");
-        fieldDirPassport = addRow(form, gbc, row++,
-            bundle.getString("dialog.dir.passport"), "");
+        fieldDirName     = addRow(form, gbc, row++, bundle.getString("dialog.dir.name"),     "", false);
+        fieldDirPassport = addRow(form, gbc, row++, bundle.getString("dialog.dir.passport"), "", false);
 
         String[] colors = buildColorOptions();
         gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0;
@@ -113,6 +109,11 @@ public class MovieDialog extends JDialog {
         form.add(fieldDirNationality, gbc);
         row++;
 
+        gbc.gridx = 0; gbc.gridy = row++; gbc.gridwidth = 2;
+        JLabel legend = new JLabel("<html><font color='red'>*</font> — " +  bundle.getString("dialog.required") + "</html>");
+        legend.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        form.add(legend, gbc);
+
         if (existing != null) prefill(existing);
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
@@ -125,20 +126,23 @@ public class MovieDialog extends JDialog {
         btnCancel.addActionListener(e -> dispose());
 
         getRootPane().setDefaultButton(btnOk);
-        getRootPane().registerKeyboardAction(
-            e -> dispose(),
-            KeyStroke.getKeyStroke("ESCAPE"),
-            JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
+        getRootPane().registerKeyboardAction(e -> dispose(),KeyStroke.getKeyStroke("ESCAPE"),JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         add(new JScrollPane(form), BorderLayout.CENTER);
         add(btnPanel, BorderLayout.SOUTH);
     }
 
-    private JTextField addRow(JPanel panel, GridBagConstraints gbc,
-                               int row, String label, String value) {
+    private JTextField addRow(JPanel panel, GridBagConstraints gbc, int row, String label, String value, boolean required) {
         gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0;
-        panel.add(new JLabel(label + ":"), gbc);
+        
+        JLabel lbl;
+        if (required) {
+            lbl = new JLabel("<html>" + label + " <font color='red'>*</font>:</html>");
+        } else {
+            lbl = new JLabel(label + ":");
+        }
+        panel.add(lbl, gbc);
+        
         JTextField field = new JTextField(value, 20);
         gbc.gridx = 1; gbc.weightx = 1;
         panel.add(field, gbc);
@@ -279,14 +283,21 @@ public class MovieDialog extends JDialog {
     public Movie getResult() { return result; }
 
     public static Movie showAddDialog(Frame parent, ResourceBundle bundle, String user) {
-        MovieDialog d = new MovieDialog(parent, bundle, null);
+        MovieDialog d = new MovieDialog(parent, bundle, null, "add");
         d.setVisible(true);
         return d.isConfirmed() ? d.getResult() : null;
     }
 
     public static Movie showEditDialog(Frame parent, ResourceBundle bundle, String user, Movie existing) {
-        MovieDialog d = new MovieDialog(parent, bundle, existing);
+        MovieDialog d = new MovieDialog(parent, bundle, existing, "update");
         d.setVisible(true);
         return d.isConfirmed() ? d.getResult() : null;
     }
+
+    public static Movie showRemoveGreaterDialog(Frame parent, ResourceBundle bundle, String user) {
+        MovieDialog d = new MovieDialog(parent, bundle, null,"remove_greater");
+        d.setVisible(true);
+        return d.isConfirmed() ? d.getResult() : null;
+    }
+
 }
